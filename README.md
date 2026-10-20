@@ -4,15 +4,17 @@ Same fair, cross-platform scoring as before, packed into fewer files.
 
 ```
 candidate-dashboard/
+├── README.md
 ├── backend/
-│   ├── server.js       everything: data normalization, candidate analyzer,
-│   │                   and the Express server, in three labeled sections
-│   └── package.json
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
 └── frontend/
-    ├── index.html
     ├── package.json
+    ├── package-lock.json
+    ├── index.html
     └── src/
-        ├── App.jsx      everything: input form, dashboard, API call
+        ├── App.jsx
         └── styles.css
 ```
 
