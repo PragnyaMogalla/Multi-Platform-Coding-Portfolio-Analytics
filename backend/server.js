@@ -5,6 +5,9 @@ import * as cheerio from 'cheerio';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import multer from 'multer';
+import PDFParser from 'pdf2json';
+import { auditResumeAgainstJob, ROLE_PRESETS } from './atsScorer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 5050;
@@ -91,7 +94,6 @@ function bumpTopic(topicCounts, canonicalTopic, difficultyLevel, count = 1) {
   topicCounts[canonicalTopic] = (topicCounts[canonicalTopic] || 0) + weight;
 }
 
-// Drop-and-Renormalize Core Logic
 function scoreComponents(components) {
   let achieved = 0, maxAvailable = 0;
   const breakdown = [];
@@ -138,10 +140,10 @@ function parseProfileInput(platformKey, rawInput) {
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' };
 
 /* ============================================================================
-   PLATFORM SCRAPERS & SCORERS (ALIGNED TO NORMALISER.DOCX)
+   PLATFORM SCRAPERS & SCORERS
    ========================================================================== */
 
-// 1. CODEFORCES (85 Pts Max Base)
+// 1. CODEFORCES
 async function fetchCodeforces(username) {
   const base = 'https://codeforces.com/api';
   const out = { platform: 'codeforces', available: false, username };
@@ -224,7 +226,7 @@ function scoreCodeforces(d) {
   ]);
 }
 
-// 2. LEETCODE (100 Pts Max Base)
+// 2. LEETCODE
 async function fetchLeetCode(username) {
   const out = { platform: 'leetcode', available: false, username };
   const query = `query userProfile($username: String!) {
@@ -294,13 +296,13 @@ function scoreLeetCode(d) {
   return scoreComponents([
     {
       key: 'problemsAndDifficulty',
-      label: 'Problem Solving & Difficulty (Weighted, 50 Pts)',
+      label: 'Problem Solving & Difficulty (50 Pts)',
       max: 50,
       compute: () => (d.weightedSolving != null ? Math.min(50, (d.weightedSolving / 700) * 50) : null)
     },
     {
       key: 'contest',
-      label: 'Contest Metrics (Rating 15 + Attended 5, 20 Pts)',
+      label: 'Contest Metrics (20 Pts)',
       max: 20,
       compute: () => {
         if (d.rating == null && d.contestsAttended == null) return null;
@@ -334,7 +336,7 @@ function scoreLeetCode(d) {
   ]);
 }
 
-// 3. CODECHEF (100 Pts Max Base)
+// 3. CODECHEF
 async function fetchCodeChef(username) {
   const out = { platform: 'codechef', available: false, username };
   try {
@@ -394,7 +396,7 @@ function scoreCodeChef(d) {
   ]);
 }
 
-// 4. HACKERRANK (100 Pts Max Base)
+// 4. HACKERRANK
 const HR_CATEGORY_MAP = [
   { key: 'problemSolving', max: 15, test: /problem solving|algorithms|data structures/i },
   { key: 'programmingLanguages', max: 10, test: /python|java|c\+\+|c\b|javascript|ruby|go\b|sql/i },
@@ -445,7 +447,7 @@ function scoreHackerRank(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
     {
-      key: 'badges', label: 'Skill Badges (4 Categories, 35 Pts)', max: 35,
+      key: 'badges', label: 'Skill Badges (35 Pts)', max: 35,
       compute: () => {
         if (!d.badgeCategoryStars) return null;
         const c = d.badgeCategoryStars;
@@ -463,13 +465,13 @@ function scoreHackerRank(d) {
       }
     },
     {
-      key: 'problems', label: 'Verified Challenge Solves (40 Pts)', max: 40,
+      key: 'problems', label: 'Challenge Solves (40 Pts)', max: 40,
       compute: () => (d.problemsSolved != null ? Math.min(40, (d.problemsSolved / 100) * 40) : null)
     }
   ]);
 }
 
-// 5. GITHUB (100 Pts Max Base)
+// 5. GITHUB
 async function fetchGitHub(username) {
   const out = { platform: 'github', available: false, username };
   try {
@@ -533,28 +535,15 @@ async function fetchGitHub(username) {
 function scoreGitHub(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
-    { key: 'repos', label: 'Repository & Project Volume (25 Pts)', max: 25, compute: () => (d.publicRepos != null ? Math.min(25, (d.publicRepos / 15) * 25) : null) },
+    { key: 'repos', label: 'Repository Volume (25 Pts)', max: 25, compute: () => (d.publicRepos != null ? Math.min(25, (d.publicRepos / 15) * 25) : null) },
     { key: 'stars', label: 'Stargazers & Code Impact (30 Pts)', max: 30, compute: () => (d.totalStars != null ? Math.min(30, (d.totalStars / 10) * 30) : null) },
-    { key: 'diversity', label: 'Language Stack Diversity (25 Pts)', max: 25, compute: () => (d.languagesUsed != null ? Math.min(25, (d.languagesUsed / 5) * 25) : null) },
+    { key: 'diversity', label: 'Language Diversity (25 Pts)', max: 25, compute: () => (d.languagesUsed != null ? Math.min(25, (d.languagesUsed / 5) * 25) : null) },
     { key: 'community', label: 'Followers & Reach (20 Pts)', max: 20, compute: () => (d.followers != null ? Math.min(20, (d.followers / 20) * 20) : null) }
   ]);
 }
 
-const FETCHERS = { 
-  leetcode: fetchLeetCode, 
-  codeforces: fetchCodeforces, 
-  codechef: fetchCodeChef, 
-  hackerrank: fetchHackerRank,
-  github: fetchGitHub
-};
-
-const SCORERS = { 
-  leetcode: scoreLeetCode, 
-  codeforces: scoreCodeforces, 
-  codechef: scoreCodeChef, 
-  hackerrank: scoreHackerRank,
-  github: scoreGitHub
-};
+const FETCHERS = { leetcode: fetchLeetCode, codeforces: fetchCodeforces, codechef: fetchCodeChef, hackerrank: fetchHackerRank, github: fetchGitHub };
+const SCORERS = { leetcode: scoreLeetCode, codeforces: scoreCodeforces, codechef: scoreCodeChef, hackerrank: scoreHackerRank, github: scoreGitHub };
 
 /* ============================================================================
    RBU PLACEMENT EVALUATION SHEET MATRIX (100 MARKS MAX)
@@ -564,7 +553,6 @@ function calculateRbuPlacementScore(user, platforms) {
   const exp = user.institutionalExperience || {};
   const breakdown = {};
 
-  // 1. Academics (15 Marks Max)
   const pct10 = Number(acad.tenthPercentage) || 0;
   const s10 = pct10 >= 80 ? 5 : pct10 >= 75 ? 4 : pct10 >= 70 ? 3 : pct10 >= 65 ? 2 : pct10 > 0 ? 1 : 0;
 
@@ -576,12 +564,8 @@ function calculateRbuPlacementScore(user, platforms) {
 
   breakdown.academics = { s10, s12, sCgpa, total: s10 + s12 + sCgpa, max: 15 };
 
-  // 2. GitHub Profile (15 Marks Max)
   const gh = platforms.github || {};
-  let ghContributions = 0;
-  let ghCollab = 0;
-  let ghFreq = 0;
-
+  let ghContributions = 0, ghCollab = 0, ghFreq = 0;
   if (gh.available) {
     const reposYr = gh.reposInLastYear || 0;
     ghContributions = reposYr > 20 ? 5 : reposYr >= 16 ? 4 : reposYr >= 11 ? 3 : reposYr >= 6 ? 2 : reposYr >= 1 ? 1 : 0;
@@ -591,7 +575,6 @@ function calculateRbuPlacementScore(user, platforms) {
   }
   breakdown.github = { contributions: ghContributions, collaborations: ghCollab, frequency: ghFreq, total: ghContributions + ghCollab + ghFreq, max: 15 };
 
-  // 3. Coding Platform Experience (20 Marks Max)
   const hr = platforms.hackerrank || {};
   const lc = platforms.leetcode || {};
   const cf = platforms.codeforces || {};
@@ -599,40 +582,19 @@ function calculateRbuPlacementScore(user, platforms) {
 
   const hrBadges = hr.available ? (hr.badgesCount || 0) : 0;
   const fallbackBadges = hr.available ? hrBadges : (lc.badgesCount || 0);
-  const sBadges = fallbackBadges >= 5 ? 5 
-                : fallbackBadges === 4 ? 4 
-                : fallbackBadges === 3 ? 3 
-                : fallbackBadges === 2 ? 2 
-                : fallbackBadges >= 1 ? 1 : 0;
+  const sBadges = fallbackBadges >= 5 ? 5 : fallbackBadges === 4 ? 4 : fallbackBadges === 3 ? 3 : fallbackBadges === 2 ? 2 : fallbackBadges >= 1 ? 1 : 0;
 
   let totalMedHard = 0;
   if (hr.available && hr.problemsSolved) {
-    const hrMedHard = (hr.badgeCategoryStars?.problemSolving >= 3 ? Math.round(hr.problemsSolved * 0.4) : 0);
-    totalMedHard += hrMedHard;
+    totalMedHard += (hr.badgeCategoryStars?.problemSolving >= 3 ? Math.round(hr.problemsSolved * 0.4) : 0);
   }
-  if (lc.available && lc.graphBuckets) {
-    totalMedHard += (lc.graphBuckets.medium || 0) + (lc.graphBuckets.hard || 0);
-  }
-  if (cf.available && cf.graphBuckets) {
-    totalMedHard += (cf.graphBuckets.medium || 0) + (cf.graphBuckets.hard || 0);
-  }
-  if (cc.available && cc.graphBuckets) {
-    totalMedHard += (cc.graphBuckets.medium || 0) + (cc.graphBuckets.hard || 0);
-  }
+  if (lc.available && lc.graphBuckets) totalMedHard += (lc.graphBuckets.medium || 0) + (lc.graphBuckets.hard || 0);
+  if (cf.available && cf.graphBuckets) totalMedHard += (cf.graphBuckets.medium || 0) + (cf.graphBuckets.hard || 0);
+  if (cc.available && cc.graphBuckets) totalMedHard += (cc.graphBuckets.medium || 0) + (cc.graphBuckets.hard || 0);
 
-  const sMedHard = totalMedHard > 20 ? 5
-                 : totalMedHard >= 16 ? 4
-                 : totalMedHard >= 11 ? 3
-                 : totalMedHard >= 6 ? 2
-                 : totalMedHard >= 1 ? 1 : 0;
-
+  const sMedHard = totalMedHard > 20 ? 5 : totalMedHard >= 16 ? 4 : totalMedHard >= 11 ? 3 : totalMedHard >= 6 ? 2 : totalMedHard >= 1 ? 1 : 0;
   const lcSolved = lc.available ? (lc.problemsSolved || 0) : 0;
-  const sLc = lcSolved > 250 ? 10
-            : lcSolved >= 201 ? 9
-            : lcSolved >= 149 ? 8
-            : lcSolved >= 101 ? 7
-            : lcSolved >= 50 ? 6
-            : lcSolved >= 20 ? 5 : 0;
+  const sLc = lcSolved > 250 ? 10 : lcSolved >= 201 ? 9 : lcSolved >= 149 ? 8 : lcSolved >= 101 ? 7 : lcSolved >= 50 ? 6 : lcSolved >= 20 ? 5 : 0;
 
   breakdown.codingPlatforms = {
     badges: sBadges,
@@ -645,7 +607,6 @@ function calculateRbuPlacementScore(user, platforms) {
     max: 20
   };
 
-  // 4. Internship Experience (10 Marks Max)
   let internScore = 0;
   if (exp.internationalInternship) {
     internScore = 10;
@@ -657,26 +618,20 @@ function calculateRbuPlacementScore(user, platforms) {
   }
   breakdown.internships = { total: internScore, max: 10 };
 
-  // 5. Skillset & Standard Certifications (15 Marks Max)
   const globalCertScore = (Number(exp.globalCertsCount) || 0) * 5;
   const nptelScore = Math.min(8, (Number(exp.nptelCoursesCount) || 0) * 4);
   const rbuCourseScore = Math.min(6, (Number(exp.rbuOnlineCoursesCount) || 0) * 3);
-  const certTotal = Math.min(15, globalCertScore + nptelScore + rbuCourseScore);
-  breakdown.certifications = { global: globalCertScore, nptel: nptelScore, rbu: rbuCourseScore, total: certTotal, max: 15 };
+  breakdown.certifications = { global: globalCertScore, nptel: nptelScore, rbu: rbuCourseScore, total: Math.min(15, globalCertScore + nptelScore + rbuCourseScore), max: 15 };
 
-  // 6. Projects (15 Marks Max)
   const industryProjects = (Number(exp.industryProjectsCount) || 0) * 5;
   const domainProjects = (Number(exp.domainProjectsCount) || 0) * 4;
-  const projTotal = Math.min(15, industryProjects + domainProjects);
-  breakdown.projects = { industry: industryProjects, domain: domainProjects, total: projTotal, max: 15 };
+  breakdown.projects = { industry: industryProjects, domain: domainProjects, total: Math.min(15, industryProjects + domainProjects), max: 15 };
 
-  // 7. Industry/Academic Coding Competitions & Hackathons (10 Marks Max)
   const hackFirst = (Number(exp.hackathonsFirstCount) || 0) * 5;
   const hackSecond = (Number(exp.hackathonsSecondCount) || 0) * 4;
   const hackThird = (Number(exp.hackathonsThirdCount) || 0) * 3;
   const hackPart = (Number(exp.hackathonsParticipationCount) || 0) * 2;
-  const hackTotal = Math.min(10, hackFirst + hackSecond + hackThird + hackPart);
-  breakdown.hackathons = { total: hackTotal, max: 10 };
+  breakdown.hackathons = { total: Math.min(10, hackFirst + hackSecond + hackThird + hackPart), max: 10 };
 
   const totalScore = breakdown.academics.total + breakdown.github.total + breakdown.codingPlatforms.total +
                      breakdown.internships.total + breakdown.certifications.total + breakdown.projects.total +
@@ -726,8 +681,6 @@ function analyzeCandidate(user, platforms) {
   }
 
   const available = Object.values(scored).filter((p) => p.available);
-
-  // Normalizer Platform Multipliers from Normaliser.docx
   const PLATFORM_WEIGHTS = { hackerrank: 1.0, leetcode: 2.0, codechef: 3.0, codeforces: 3.5, github: 2.0 };
   let weightedScoreSum = 0;
   let totalPlatformWeight = 0;
@@ -741,7 +694,6 @@ function analyzeCandidate(user, platforms) {
   }
 
   const overallScore = totalPlatformWeight > 0 ? Math.round((weightedScoreSum / totalPlatformWeight) * 10) / 10 : null;
-
   const mastery = buildTopicMastery(scored);
   const swot = buildSwot(mastery);
 
@@ -830,10 +782,93 @@ async function normalizeCandidate(profiles) {
   return platforms;
 }
 
+/* ============================================================================
+   RANKING ENGINE
+   - GLOBAL RANK: STRICTLY CP SIGNAL OVERALL SCORE
+   - COMMUNITY RANK: STRICTLY RBU PLACEMENT TOTAL SCORE
+   ========================================================================== */
+function getCpScore(candidate) {
+  return Number(candidate.latestScore?.overallScore) || 0;
+}
+
+function getRbuScore(candidate) {
+  return Number(candidate.latestScore?.rbuPlacement?.totalScore) || 0;
+}
+
+function calculateRankings(db) {
+  const allCandidates = db.users.filter((u) => u.role === 'candidate');
+
+  // 1. GLOBAL RANKING (Sorted Strictly by CP Score Descending)
+  const globalSorted = [...allCandidates].sort((a, b) => getCpScore(b) - getCpScore(a));
+  const globalRankMap = new Map();
+  globalSorted.forEach((c, idx) => globalRankMap.set(c.username.toLowerCase(), idx + 1));
+
+  // 2. COMMUNITY RANKINGS (Sorted Strictly by RBU Score Descending per Community)
+  const communityRankMap = new Map();
+  const communities = db.users.filter((u) => u.role === 'community');
+
+  communities.forEach((lead) => {
+    const memberUsernames = (lead.members || []).map((m) => m.toLowerCase());
+    const communityCandidates = allCandidates
+      .filter((c) => memberUsernames.includes(c.username.toLowerCase()))
+      .sort((a, b) => getRbuScore(b) - getRbuScore(a));
+
+    communityCandidates.forEach((c, idx) => {
+      const key = `${lead.communityCode.toUpperCase()}__${c.username.toLowerCase()}`;
+      communityRankMap.set(key, {
+        rank: idx + 1,
+        totalMembers: communityCandidates.length,
+        communityName: lead.name,
+        communityCode: lead.communityCode
+      });
+    });
+  });
+
+  return { globalRankMap, communityRankMap, globalTotal: allCandidates.length };
+}
+
+function attachRankingMetadata(user, db) {
+  if (user.role !== 'candidate') return user;
+  const { globalRankMap, communityRankMap, globalTotal } = calculateRankings(db);
+  const username = user.username.toLowerCase();
+
+  const currentGlobalRank = globalRankMap.get(username) || globalTotal;
+
+  // Build full array of all communities this student is a member of
+  const allCommunityRanks = [];
+  (user.communities || []).forEach((code) => {
+    const key = `${code.toUpperCase()}__${username}`;
+    const rankInfo = communityRankMap.get(key);
+    if (rankInfo) {
+      allCommunityRanks.push(rankInfo);
+    } else {
+      allCommunityRanks.push({
+        rank: 1,
+        totalMembers: 1,
+        communityName: code,
+        communityCode: code
+      });
+    }
+  });
+
+  const primaryCommInfo = allCommunityRanks[0] || null;
+
+  user.rankings = {
+    globalRank: currentGlobalRank,
+    globalTotal,
+    primaryCommunity: primaryCommInfo?.communityCode || null,
+    communityRank: primaryCommInfo?.rank || null,
+    allCommunityRanks
+  };
+
+  return user;
+}
+
 async function refreshCandidateLive(user, db) {
   try {
     const platforms = await normalizeCandidate(user.links);
     user.latestScore = analyzeCandidate(user, platforms);
+    attachRankingMetadata(user, db);
     saveDB(db);
   } catch (err) {
     console.error(`Live refresh error for ${user.username}:`, err.message);
@@ -842,11 +877,13 @@ async function refreshCandidateLive(user, db) {
 }
 
 /* ============================================================================
-   EXPRESS SERVER & API ROUTES (REAL-TIME ENABLED)
+   EXPRESS SERVER & API ROUTES
    ========================================================================== */
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 
 // 1. Sign Up
 app.post('/api/auth/signup', async (req, res) => {
@@ -911,6 +948,11 @@ app.post('/api/auth/signup', async (req, res) => {
   db.users.push(newUser);
   saveDB(db);
 
+  if (newUser.role === 'candidate') {
+    attachRankingMetadata(newUser, db);
+    saveDB(db);
+  }
+
   const { password: _, ...safeUser } = newUser;
   res.json({ message: 'Account created successfully', user: safeUser });
 });
@@ -930,14 +972,14 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ user: safeUser });
 });
 
-// 3. Auto-Live User Refresh
+// 3. User Refresh
 app.get('/api/user/:username', async (req, res) => {
   const db = loadDB();
   const user = db.users.find((u) => u.username.toLowerCase() === req.params.username.toLowerCase());
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   if (user.role === 'candidate') {
-    await refreshCandidateLive(user, db);
+    attachRankingMetadata(user, db);
   }
 
   const { password: _, ...safeUser } = user;
@@ -956,7 +998,7 @@ app.post('/api/user/recalculate', async (req, res) => {
   res.json({ message: 'Live scoring matrix recalculated!', user: safeUser });
 });
 
-// 5. Update Academic & Placement Credentials
+// 5. Update Credentials
 app.post('/api/user/update-placement-credentials', async (req, res) => {
   const { username, academics, institutionalExperience } = req.body;
   const db = loadDB();
@@ -971,7 +1013,144 @@ app.post('/api/user/update-placement-credentials', async (req, res) => {
   res.json({ message: 'Credentials updated and re-evaluated live!', user: safeUser });
 });
 
-// 6. Add & Lock Platform Link
+// 6. ML Simulation: Dual-Predictive Model
+app.post('/api/user/simulate-rank-increase', (req, res) => {
+  const { username } = req.body;
+  const db = loadDB();
+  const targetUser = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase() && u.role === 'candidate');
+  if (!targetUser) return res.status(404).json({ error: 'Candidate not found.' });
+
+  attachRankingMetadata(targetUser, db);
+  const currentGlobalRank = targetUser.rankings.globalRank;
+  const currentCommRank = targetUser.rankings.communityRank || 1;
+  const baseCp = getCpScore(targetUser);
+  const baseRbu = getRbuScore(targetUser);
+
+  const allCandidates = db.users.filter((u) => u.role === 'candidate');
+  const communityMembers = targetUser.rankings.primaryCommunity
+    ? allCandidates.filter((c) => (c.communities || []).includes(targetUser.rankings.primaryCommunity))
+    : allCandidates;
+
+  const strategies = [
+    {
+      id: 'solve_dsa_medium',
+      title: 'Solve 10 Medium / Hard DSA Problems',
+      description: 'Practice 10 Medium/Hard problems on LeetCode/Codeforces',
+      scoreLift: 5.0
+    },
+    {
+      id: 'publish_repos',
+      title: 'Push 3 Active Projects to GitHub',
+      description: 'Commit regularly and maintain bi-weekly contribution consistency',
+      scoreLift: 4.0
+    },
+    {
+      id: 'global_cert',
+      title: 'Clear 1 Global Cloud/Security Certification',
+      description: 'AWS / Azure / GCP / CISCO industry certification (+5 M)',
+      scoreLift: 5.0
+    },
+    {
+      id: 'industry_project',
+      title: 'Complete 1 Industry Problem / SIH Project',
+      description: 'Document an industry-mentored or hackathon problem statement (+5 M)',
+      scoreLift: 5.0
+    },
+    {
+      id: 'hackathon_podium',
+      title: 'Win or Place in an Inter-College Hackathon',
+      description: 'Earn 1st or 2nd prize in an accredited hackathon (+4 to +5 M)',
+      scoreLift: 4.0
+    }
+  ];
+
+  const recommendations = strategies.map((strat) => {
+    const simulatedCp = Math.min(100, baseCp + strat.scoreLift);
+    const simulatedRbu = Math.min(100, baseRbu + strat.scoreLift);
+
+    // Predict Global Rank (strictly via CP score)
+    const newGlobalRank = allCandidates.filter((c) => {
+      if (c.username.toLowerCase() === targetUser.username.toLowerCase()) return false;
+      return getCpScore(c) > simulatedCp;
+    }).length + 1;
+
+    // Predict Community Rank (strictly via RBU score)
+    const newCommRank = communityMembers.filter((c) => {
+      if (c.username.toLowerCase() === targetUser.username.toLowerCase()) return false;
+      return getRbuScore(c) > simulatedRbu;
+    }).length + 1;
+
+    const globalDelta = Math.max(0, currentGlobalRank - newGlobalRank);
+    const commDelta = Math.max(0, currentCommRank - newCommRank);
+
+    return {
+      ...strat,
+      simulatedScore: simulatedRbu,
+      predictedGlobalRank: newGlobalRank,
+      predictedCommunityRank: newCommRank,
+      globalRankIncrease: globalDelta,
+      communityRankIncrease: commDelta
+    };
+  });
+
+  res.json({
+    currentGlobalRank,
+    currentCommunityRank: currentCommRank,
+    baseCp,
+    baseRbu,
+    recommendations: recommendations.sort((a, b) => (b.communityRankIncrease + b.globalRankIncrease) - (a.communityRankIncrease + a.globalRankIncrease))
+  });
+});
+
+// 7. ATS Engine Roles & Multipart Audit
+app.get('/api/ats/roles', (req, res) => {
+  const roles = Object.entries(ROLE_PRESETS).map(([id, r]) => ({
+    id,
+    title: r.title,
+    keywordsCount: r.keywords.length
+  }));
+  res.json({ roles });
+});
+
+app.post('/api/ats/audit', upload.single('resumeFile'), async (req, res) => {
+  try {
+    let { resumeText, jobDescription, targetRole, username } = req.body;
+
+    if (req.file) {
+      if (req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf')) {
+        resumeText = await new Promise((resolve, reject) => {
+          const pdfParser = new PDFParser(null, 1);
+          pdfParser.on('pdfParser_dataError', (errData) => reject(errData.parserError));
+          pdfParser.on('pdfParser_dataReady', () => resolve(pdfParser.getRawTextContent()));
+          pdfParser.parseBuffer(req.file.buffer);
+        });
+      } else {
+        resumeText = req.file.buffer.toString('utf-8');
+      }
+    }
+
+    if (!resumeText || !resumeText.trim()) {
+      return res.status(400).json({ error: 'Please upload a resume file (.pdf, .txt) or paste your resume text.' });
+    }
+
+    const db = loadDB();
+    const candidateUser = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase());
+
+    const result = auditResumeAgainstJob({
+      resumeText,
+      jobDescription,
+      targetRole,
+      candidateUser
+    });
+
+    res.json({ ...result, extractedResumeText: resumeText });
+  } catch (err) {
+    console.error('ATS Audit Error:', err);
+    res.status(500).json({ error: 'Failed to process resume file: ' + err.message });
+  }
+});
+
+// 8. Add & Lock Platform Link
 app.post('/api/user/add-link', async (req, res) => {
   const { username, platform, link } = req.body;
   const db = loadDB();
@@ -992,7 +1171,174 @@ app.post('/api/user/add-link', async (req, res) => {
   res.json({ message: `Successfully added and permanently locked ${platform}.`, user: safeUser });
 });
 
-// 7. Delete Account
+// 9. Community Workflows (Mutual Joining)
+
+// A. Student Requests to Join Community via Code
+app.post('/api/community/student-request', (req, res) => {
+  const { studentUsername, communityCode } = req.body;
+  const db = loadDB();
+  const codeClean = (communityCode || '').trim().toUpperCase();
+  const lead = db.users.find((u) => u.role === 'community' && (u.communityCode || '').toUpperCase() === codeClean);
+  if (!lead) return res.status(404).json({ error: 'Invalid Community Code. Verify the code with your lead.' });
+
+  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
+  lead.members = lead.members || [];
+  lead.pendingRequests = lead.pendingRequests || [];
+
+  if (lead.members.includes(student.username)) return res.status(400).json({ error: 'You are already a member of this community.' });
+  if (lead.pendingRequests.includes(student.username)) return res.status(400).json({ error: 'Join request already submitted. Awaiting lead approval.' });
+
+  lead.pendingRequests.push(student.username);
+  saveDB(db);
+  res.json({ message: `Request successfully sent to ${lead.name} (${codeClean})!` });
+});
+
+// B. Lead Responds to Student Request
+app.post('/api/community/admin-respond-request', (req, res) => {
+  const { adminUsername, studentUsername, action } = req.body;
+  const db = loadDB();
+  const lead = db.users.find((u) => u.username.toLowerCase() === adminUsername.toLowerCase() && u.role === 'community');
+  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
+
+  lead.pendingRequests = (lead.pendingRequests || []).filter((u) => u.toLowerCase() !== studentUsername.toLowerCase());
+  if (action === 'accept') {
+    lead.members = lead.members || [];
+    if (!lead.members.includes(student.username)) lead.members.push(student.username);
+    student.communities = student.communities || [];
+    if (!student.communities.includes(lead.communityCode)) student.communities.push(lead.communityCode);
+  }
+  saveDB(db);
+  res.json({ message: `Request ${action === 'accept' ? 'accepted' : 'declined'}.` });
+});
+
+// C. Lead Invites Student by Unique Username Handle
+app.post('/api/community/admin-invite-student', (req, res) => {
+  const { adminUsername, studentUsername } = req.body;
+  const db = loadDB();
+  const lead = db.users.find((u) => u.username.toLowerCase() === adminUsername.toLowerCase() && u.role === 'community');
+  const student = db.users.find((u) => u.username.toLowerCase() === (studentUsername || '').trim().toLowerCase() && u.role === 'candidate');
+  
+  if (!lead) return res.status(404).json({ error: 'Community lead not found.' });
+  if (!student) return res.status(404).json({ error: `Candidate @${studentUsername} not found. Please enter their exact handle.` });
+
+  lead.members = lead.members || [];
+  if (lead.members.includes(student.username)) {
+    return res.status(400).json({ error: 'Candidate is already a verified member of your community.' });
+  }
+
+  student.incomingInvites = student.incomingInvites || [];
+  if (student.incomingInvites.some((inv) => inv.code === lead.communityCode)) {
+    return res.status(400).json({ error: 'Invitation already pending for this candidate.' });
+  }
+
+  student.incomingInvites.push({
+    code: lead.communityCode,
+    communityName: lead.name,
+    invitedAt: new Date().toISOString()
+  });
+
+  saveDB(db);
+  res.json({ message: `Invitation successfully dispatched to @${student.username}!` });
+});
+
+// D. Student Responds to Lead Invitation
+app.post('/api/community/student-respond-invite', (req, res) => {
+  const { studentUsername, communityCode, action } = req.body;
+  const db = loadDB();
+  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
+  const lead = db.users.find((u) => u.role === 'community' && u.communityCode === communityCode);
+
+  student.incomingInvites = (student.incomingInvites || []).filter((inv) => inv.code !== communityCode);
+  if (action === 'accept' && lead) {
+    student.communities = student.communities || [];
+    if (!student.communities.includes(communityCode)) student.communities.push(communityCode);
+    lead.members = lead.members || [];
+    if (!lead.members.includes(student.username)) lead.members.push(student.username);
+  }
+  attachRankingMetadata(student, db);
+  saveDB(db);
+
+  const { password: _, ...safeUser } = student;
+  res.json({ message: `Invitation ${action === 'accept' ? 'accepted' : 'declined'}.`, user: safeUser });
+});
+
+// 10. Admin Cohort Leaderboard (Strictly Sorted by RBU Score)
+app.get('/api/admin/cohort/:adminUsername', async (req, res) => {
+  const db = loadDB();
+  const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
+  if (!lead) return res.status(404).json({ error: 'Admin not found.' });
+
+  const verifiedCohort = db.users.filter((u) => u.role === 'candidate' && (lead.members || []).includes(u.username));
+  await Promise.all(verifiedCohort.map((c) => refreshCandidateLive(c, db)));
+
+  verifiedCohort.forEach((c) => attachRankingMetadata(c, db));
+  
+  // Sorted strictly by RBU score descending for the Community Leaderboard
+  verifiedCohort.sort((a, b) => getRbuScore(b) - getRbuScore(a));
+
+  const cleanCohort = verifiedCohort.map(({ password: _, ...rest }) => rest);
+  const pendingRequests = db.users
+    .filter((u) => (lead.pendingRequests || []).includes(u.username))
+    .map((u) => ({ name: u.name, username: u.username, email: u.email }));
+
+  res.json({ communityCode: lead.communityCode, cohort: cleanCohort, pendingRequests });
+});
+
+// 11. Admin Export CSV
+app.get('/api/admin/export-csv/:adminUsername', async (req, res) => {
+  const db = loadDB();
+  const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
+  if (!lead) return res.status(404).send('Admin not found');
+
+  const candidates = db.users.filter((u) => u.role === 'candidate' && (lead.members || []).includes(u.username));
+  await Promise.all(candidates.map((c) => refreshCandidateLive(c, db)));
+  candidates.forEach((c) => attachRankingMetadata(c, db));
+  candidates.sort((a, b) => getRbuScore(b) - getRbuScore(a));
+
+  const headers = [
+    'Community RBU Rank',
+    'Global CP Rank',
+    'Username',
+    'Name',
+    'Email',
+    'RBU Placement Score',
+    'CP Signal Index',
+    '10th %',
+    '12th %',
+    'CGPA',
+    'LeetCode Solves',
+    'GitHub Repos',
+    'Last Synced'
+  ];
+
+  const rows = candidates.map((c, idx) => {
+    const lcSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'leetcode');
+    const ghSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'github');
+
+    return [
+      `"#${idx + 1}"`,
+      `"#${c.rankings?.globalRank || 'N/A'}"`,
+      `"${c.username}"`,
+      `"${c.name}"`,
+      `"${c.email}"`,
+      c.latestScore?.rbuPlacement?.totalScore ?? 'N/A',
+      c.latestScore?.overallScore ?? 'N/A',
+      c.academics?.tenthPercentage || 'N/A',
+      c.academics?.twelfthPercentage || 'N/A',
+      c.academics?.cgpa || 'N/A',
+      lcSummary?.problemsSolved ?? 'N/A',
+      ghSummary?.problemsSolved ?? 'N/A',
+      `"${c.latestScore?.lastUpdated || new Date().toISOString()}"`
+    ];
+  });
+
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="${lead.communityCode}_cohort_ranks.csv"`);
+  res.send(csvContent);
+});
+
+// 12. Delete Account
 app.post('/api/user/delete-account', (req, res) => {
   const { username, password } = req.body;
   const db = loadDB();
@@ -1024,149 +1370,15 @@ app.post('/api/user/delete-account', (req, res) => {
   res.json({ message: 'Account permanently deleted.' });
 });
 
-// 8. Community Workflow
-app.post('/api/community/student-request', (req, res) => {
-  const { studentUsername, communityCode } = req.body;
-  const db = loadDB();
-  const codeClean = (communityCode || '').trim().toUpperCase();
-  const lead = db.users.find((u) => u.role === 'community' && (u.communityCode || '').toUpperCase() === codeClean);
-  if (!lead) return res.status(404).json({ error: 'Invalid Community Code.' });
-
-  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
-  lead.members = lead.members || [];
-  lead.pendingRequests = lead.pendingRequests || [];
-
-  if (lead.members.includes(student.username)) return res.status(400).json({ error: 'Already a verified member.' });
-  if (lead.pendingRequests.includes(student.username)) return res.status(400).json({ error: 'Request already pending.' });
-
-  lead.pendingRequests.push(student.username);
-  saveDB(db);
-  res.json({ message: `Request sent to ${lead.name} (${codeClean})!` });
+const server = app.listen(PORT, () => {
+  console.log(`Candidate Dashboard server running on http://localhost:${PORT}`);
 });
 
-app.post('/api/community/admin-respond-request', (req, res) => {
-  const { adminUsername, studentUsername, action } = req.body;
-  const db = loadDB();
-  const lead = db.users.find((u) => u.username.toLowerCase() === adminUsername.toLowerCase() && u.role === 'community');
-  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
-
-  lead.pendingRequests = (lead.pendingRequests || []).filter((u) => u.toLowerCase() !== studentUsername.toLowerCase());
-  if (action === 'accept') {
-    lead.members = lead.members || [];
-    if (!lead.members.includes(student.username)) lead.members.push(student.username);
-    student.communities = student.communities || [];
-    if (!student.communities.includes(lead.communityCode)) student.communities.push(lead.communityCode);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is busy. Kill the zombie process and restart.`);
+    process.exit(1);
+  } else {
+    throw err;
   }
-  saveDB(db);
-  res.json({ message: `Request ${action === 'accept' ? 'accepted' : 'declined'}.` });
 });
-
-app.post('/api/community/admin-invite-student', (req, res) => {
-  const { adminUsername, studentUsername } = req.body;
-  const db = loadDB();
-  const lead = db.users.find((u) => u.username.toLowerCase() === adminUsername.toLowerCase() && u.role === 'community');
-  const student = db.users.find((u) => u.username.toLowerCase() === (studentUsername || '').trim().toLowerCase() && u.role === 'candidate');
-  if (!student) return res.status(404).json({ error: 'Candidate not found.' });
-
-  student.incomingInvites = student.incomingInvites || [];
-  if (student.incomingInvites.some((inv) => inv.code === lead.communityCode)) {
-    return res.status(400).json({ error: 'Invitation already sent.' });
-  }
-
-  student.incomingInvites.push({ code: lead.communityCode, communityName: lead.name, invitedAt: new Date().toISOString() });
-  saveDB(db);
-  res.json({ message: `Invitation sent to @${student.username}!` });
-});
-
-app.post('/api/community/student-respond-invite', (req, res) => {
-  const { studentUsername, communityCode, action } = req.body;
-  const db = loadDB();
-  const student = db.users.find((u) => u.username.toLowerCase() === studentUsername.toLowerCase());
-  const lead = db.users.find((u) => u.role === 'community' && u.communityCode === communityCode);
-
-  student.incomingInvites = (student.incomingInvites || []).filter((inv) => inv.code !== communityCode);
-  if (action === 'accept' && lead) {
-    student.communities = student.communities || [];
-    if (!student.communities.includes(communityCode)) student.communities.push(communityCode);
-    lead.members = lead.members || [];
-    if (!lead.members.includes(student.username)) lead.members.push(student.username);
-  }
-  saveDB(db);
-  const { password: _, ...safeUser } = student;
-  res.json({ message: `Invitation ${action === 'accept' ? 'accepted' : 'declined'}.`, user: safeUser });
-});
-
-// 9. Admin - Cohort View (Live Sync)
-app.get('/api/admin/cohort/:adminUsername', async (req, res) => {
-  const db = loadDB();
-  const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
-  if (!lead) return res.status(404).json({ error: 'Admin not found.' });
-
-  const verifiedCohort = db.users
-    .filter((u) => u.role === 'candidate' && (lead.members || []).includes(u.username));
-
-  await Promise.all(verifiedCohort.map((candidate) => refreshCandidateLive(candidate, db)));
-
-  const cleanCohort = verifiedCohort.map(({ password: _, ...rest }) => rest);
-  const pendingRequests = db.users
-    .filter((u) => (lead.pendingRequests || []).includes(u.username))
-    .map((u) => ({ name: u.name, username: u.username, email: u.email }));
-
-  res.json({ communityCode: lead.communityCode, cohort: cleanCohort, pendingRequests });
-});
-
-// 10. Admin - Live Real-Time CSV Export
-app.get('/api/admin/export-csv/:adminUsername', async (req, res) => {
-  const db = loadDB();
-  const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
-  if (!lead) return res.status(404).send('Admin not found');
-
-  const candidates = db.users.filter((u) => u.role === 'candidate' && (lead.members || []).includes(u.username));
-
-  await Promise.all(candidates.map((c) => refreshCandidateLive(c, db)));
-
-  const headers = [
-    'Unique Username',
-    'Name',
-    'Email',
-    'CP Signal Index (out of 100)',
-    'RBU Placement Score (out of 100)',
-    '10th %',
-    '12th %',
-    'CGPA',
-    'LeetCode Solves',
-    'GitHub Repos',
-    'GitHub Stars',
-    'Codeforces Rating',
-    'Last Synced At'
-  ];
-
-  const rows = candidates.map((c) => {
-    const lcSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'leetcode');
-    const ghSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'github');
-    const cfSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'codeforces');
-
-    return [
-      `"${c.username}"`,
-      `"${c.name}"`,
-      `"${c.email}"`,
-      c.latestScore?.overallScore ?? 'N/A',
-      c.latestScore?.rbuPlacement?.totalScore ?? 'N/A',
-      c.academics?.tenthPercentage || 'N/A',
-      c.academics?.twelfthPercentage || 'N/A',
-      c.academics?.cgpa || 'N/A',
-      lcSummary?.problemsSolved ?? 'N/A',
-      ghSummary?.problemsSolved ?? 'N/A',
-      c.latestScore?.rbuPlacement?.breakdown?.github?.total ?? 'N/A',
-      cfSummary?.platformScore ?? 'N/A',
-      `"${c.latestScore?.lastUpdated || new Date().toISOString()}"`
-    ];
-  });
-
-  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', `attachment; filename="${lead.communityCode}_cohort_realtime.csv"`);
-  res.send(csvContent);
-});
-
-app.listen(PORT, () => console.log(`Candidate Dashboard server running on http://localhost:${PORT}`));
