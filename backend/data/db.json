@@ -1,0 +1,455 @@
+{
+  "users": [
+    {
+      "id": "usr_1792771177367",
+      "name": "hey",
+      "email": "hi",
+      "username": "pragnya_17_",
+      "password": "Hello",
+      "role": "candidate",
+      "createdAt": "2026-10-23T15:59:37.367Z",
+      "links": {
+        "leetcode": "https://leetcode.com/u/Pragnya_15/",
+        "codeforces": "https://codeforces.com/profile/Pragnya_15_",
+        "github": "https://github.com/air",
+        "codechef": "https://codechef.com/users/piyush",
+        "hackerrank": "https://hackerrank.com/profile/piyush"
+      },
+      "lockedLinks": [
+        "leetcode",
+        "codeforces",
+        "github",
+        "codechef",
+        "hackerrank"
+      ],
+      "academics": {
+        "tenthPercentage": "89",
+        "twelfthPercentage": "85.2",
+        "cgpa": "8.42"
+      },
+      "institutionalExperience": {
+        "internationalInternship": false,
+        "reputedInternshipsCount": 0,
+        "eduskillsInternshipsCount": "0",
+        "stipendAbove10k": false,
+        "globalCertsCount": 0,
+        "nptelCoursesCount": 0,
+        "rbuOnlineCoursesCount": "0",
+        "industryProjectsCount": "0",
+        "domainProjectsCount": "0",
+        "hackathonsFirstCount": 0,
+        "hackathonsSecondCount": 0,
+        "hackathonsThirdCount": 0,
+        "hackathonsParticipationCount": ""
+      },
+      "communities": [],
+      "incomingInvites": [],
+      "latestScore": {
+        "overallScore": 48.2,
+        "rbuPlacement": {
+          "totalScore": 43,
+          "breakdown": {
+            "academics": {
+              "s10": 5,
+              "s12": 5,
+              "sCgpa": 5,
+              "total": 15,
+              "max": 15
+            },
+            "github": {
+              "contributions": 5,
+              "collaborations": 6,
+              "frequency": 0,
+              "total": 11,
+              "max": 15
+            },
+            "codingPlatforms": {
+              "badges": 5,
+              "mediumHard": 5,
+              "leetcode": 7,
+              "totalBadgesCount": 11,
+              "totalMedHardSolved": 109,
+              "leetcodeSolved": 122,
+              "total": 17,
+              "max": 20
+            },
+            "internships": {
+              "total": 0,
+              "max": 10
+            },
+            "certifications": {
+              "global": 0,
+              "nptel": 0,
+              "rbu": 0,
+              "total": 0,
+              "max": 15
+            },
+            "projects": {
+              "industry": 0,
+              "domain": 0,
+              "total": 0,
+              "max": 15
+            },
+            "hackathons": {
+              "total": 0,
+              "max": 10
+            }
+          }
+        },
+        "lastUpdated": "2026-10-23T17:28:22.665Z",
+        "dataConfidence": {
+          "platformsAvailable": 5,
+          "platformsRequested": 5,
+          "label": "strong signal"
+        },
+        "platformSummaries": [
+          {
+            "platform": "leetcode",
+            "available": true,
+            "username": "Pragnya_15",
+            "platformScore": 50.3,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving & Difficulty (Weighted, 50 Pts)",
+                "max": 50,
+                "points": 21.6,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (Rating 15 + Attended 5, 20 Pts)",
+                "max": 20,
+                "available": false
+              },
+              {
+                "key": "diversity",
+                "label": "Topic & Language Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 4,
+                "available": true
+              }
+            ],
+            "problemsSolved": 122
+          },
+          {
+            "platform": "codeforces",
+            "available": true,
+            "username": "Pragnya_15_",
+            "platformScore": 2.7,
+            "scoreBreakdown": [
+              {
+                "key": "rating",
+                "label": "Rating / Rank (40 Pts)",
+                "max": 40,
+                "available": false
+              },
+              {
+                "key": "problems",
+                "label": "Problem-Solving Metrics (25 Pts)",
+                "max": 25,
+                "points": 0.8,
+                "available": true
+              },
+              {
+                "key": "contests",
+                "label": "Contest Activity (15 Pts)",
+                "max": 15,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "consistency",
+                "label": "Profile Consistency (5 Pts)",
+                "max": 5,
+                "points": 0.4,
+                "available": true
+              }
+            ],
+            "problemsSolved": 12
+          },
+          {
+            "platform": "github",
+            "available": true,
+            "username": "air",
+            "platformScore": 100,
+            "scoreBreakdown": [
+              {
+                "key": "repos",
+                "label": "Repository & Project Volume (25 Pts)",
+                "max": 25,
+                "points": 25,
+                "available": true
+              },
+              {
+                "key": "stars",
+                "label": "Stargazers & Code Impact (30 Pts)",
+                "max": 30,
+                "points": 30,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Language Stack Diversity (25 Pts)",
+                "max": 25,
+                "points": 25,
+                "available": true
+              },
+              {
+                "key": "community",
+                "label": "Followers & Reach (20 Pts)",
+                "max": 20,
+                "points": 20,
+                "available": true
+              }
+            ],
+            "problemsSolved": 29
+          },
+          {
+            "platform": "codechef",
+            "available": true,
+            "username": "piyush",
+            "platformScore": 67.8,
+            "scoreBreakdown": [
+              {
+                "key": "rating",
+                "label": "Current Rating / Stars (35 Pts)",
+                "max": 35,
+                "points": 29.6,
+                "available": true
+              },
+              {
+                "key": "problems",
+                "label": "Problems Solved (Weighted, 30 Pts)",
+                "max": 30,
+                "available": false
+              },
+              {
+                "key": "contest",
+                "label": "Contest Performance (20 Pts)",
+                "max": 20,
+                "points": 8.8,
+                "available": true
+              },
+              {
+                "key": "difficulty",
+                "label": "Difficulty Beyond Beginner (10 Pts)",
+                "max": 10,
+                "points": 4,
+                "available": true
+              },
+              {
+                "key": "consistency",
+                "label": "Badges & Consistency (5 Pts)",
+                "max": 5,
+                "points": 5,
+                "available": true
+              }
+            ],
+            "problemsSolved": null
+          },
+          {
+            "platform": "hackerrank",
+            "available": true,
+            "username": "piyush",
+            "platformScore": 40.3,
+            "scoreBreakdown": [
+              {
+                "key": "badges",
+                "label": "Skill Badges (4 Categories, 35 Pts)",
+                "max": 35,
+                "points": 24.2,
+                "available": true
+              },
+              {
+                "key": "medals",
+                "label": "Contest Medals (25 Pts)",
+                "max": 25,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "problems",
+                "label": "Verified Challenge Solves (40 Pts)",
+                "max": 40,
+                "available": false
+              }
+            ],
+            "problemsSolved": null
+          }
+        ],
+        "topicMastery": {
+          "Arrays & Strings": 100,
+          "Hashing": 20,
+          "Sorting & Searching": 31,
+          "Linked Lists": 6,
+          "Stacks & Queues": 20,
+          "Trees": 34,
+          "Graphs": 2,
+          "Dynamic Programming": 69,
+          "Greedy": 8,
+          "Backtracking": 43,
+          "Math & Number Theory": 34,
+          "Divide & Conquer": 26,
+          "Design & OOP": 6,
+          "Strings & Pattern Matching": 0,
+          "Simulation": 4
+        },
+        "swot": {
+          "strengths": [
+            {
+              "topic": "Arrays & Strings",
+              "score": 100
+            }
+          ],
+          "weaknesses": [
+            {
+              "topic": "Dynamic Programming",
+              "score": 69
+            },
+            {
+              "topic": "Backtracking",
+              "score": 43
+            },
+            {
+              "topic": "Trees",
+              "score": 34
+            },
+            {
+              "topic": "Math & Number Theory",
+              "score": 34
+            },
+            {
+              "topic": "Sorting & Searching",
+              "score": 31
+            }
+          ],
+          "opportunities": [
+            {
+              "topic": "Divide & Conquer",
+              "score": 26
+            },
+            {
+              "topic": "Hashing",
+              "score": 20
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 20
+            },
+            {
+              "topic": "Greedy",
+              "score": 8
+            },
+            {
+              "topic": "Linked Lists",
+              "score": 6
+            },
+            {
+              "topic": "Simulation",
+              "score": 4
+            },
+            {
+              "topic": "Strings & Pattern Matching",
+              "score": 0
+            }
+          ],
+          "threats": [
+            {
+              "topic": "Design & OOP",
+              "score": 6
+            },
+            {
+              "topic": "Graphs",
+              "score": 2
+            }
+          ]
+        },
+        "difficultyProfile": {
+          "totals": {
+            "easy": 25,
+            "medium": 73,
+            "hard": 36
+          },
+          "total": 134,
+          "percentages": {
+            "easy": 18.7,
+            "medium": 54.5,
+            "hard": 26.9
+          }
+        },
+        "contestPerformance": {
+          "byPlatform": {
+            "leetcode": null,
+            "codeforces": 0,
+            "github": null,
+            "codechef": 11,
+            "hackerrank": null
+          },
+          "total": 11
+        },
+        "languageAnalysis": [
+          {
+            "language": "C",
+            "count": 81
+          },
+          {
+            "language": "Python",
+            "count": 39
+          },
+          {
+            "language": "JavaScript",
+            "count": 11
+          },
+          {
+            "language": "C++",
+            "count": 10
+          },
+          {
+            "language": "GNU C11",
+            "count": 10
+          },
+          {
+            "language": "Java",
+            "count": 4
+          },
+          {
+            "language": "Shell",
+            "count": 2
+          },
+          {
+            "language": "Python3",
+            "count": 1
+          },
+          {
+            "language": "Java 21",
+            "count": 1
+          },
+          {
+            "language": "Python 3",
+            "count": 1
+          },
+          {
+            "language": "HTML",
+            "count": 1
+          },
+          {
+            "language": "Lua",
+            "count": 1
+          },
+          {
+            "language": "Go",
+            "count": 1
+          }
+        ]
+      }
+    }
+  ]
+}
