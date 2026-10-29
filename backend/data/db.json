@@ -1,357 +1,75 @@
 {
   "users": [
     {
-      "id": "usr_1792771177367",
-      "name": "hey",
-      "email": "hi",
-      "username": "pragnya_17_",
+      "id": "usr_1792814073620",
+      "name": "ssssss",
+      "email": "sfd",
+      "username": "pragnya_18_",
       "password": "Hello",
+      "role": "community",
+      "createdAt": "2026-10-24T03:54:33.620Z",
+      "communityCode": "RBU-9906",
+      "members": [
+        "lowkeyme2",
+        "codeair",
+        "kyubeyrud",
+        "pragnya_17_"
+      ],
+      "pendingRequests": []
+    },
+    {
+      "id": "usr_1792814352251",
+      "name": "dsv",
+      "email": "ads",
+      "username": "lowkeyme2",
+      "password": "melowkey",
       "role": "candidate",
-      "createdAt": "2026-10-23T15:59:37.367Z",
+      "createdAt": "2026-10-24T03:59:12.251Z",
       "links": {
         "leetcode": "https://leetcode.com/u/Pragnya_15/",
         "codeforces": "https://codeforces.com/profile/Pragnya_15_",
-        "github": "https://github.com/air",
-        "codechef": "https://codechef.com/users/piyush",
         "hackerrank": "https://hackerrank.com/profile/piyush"
       },
       "lockedLinks": [
         "leetcode",
         "codeforces",
-        "github",
-        "codechef",
         "hackerrank"
       ],
       "academics": {
-        "tenthPercentage": "89",
-        "twelfthPercentage": "85.2",
-        "cgpa": "8.81"
+        "tenthPercentage": "",
+        "twelfthPercentage": "",
+        "cgpa": ""
       },
       "institutionalExperience": {
         "internationalInternship": false,
-        "reputedInternshipsCount": "02",
-        "eduskillsInternshipsCount": "2",
-        "stipendAbove10k": false,
-        "globalCertsCount": "02",
-        "nptelCoursesCount": 0,
-        "rbuOnlineCoursesCount": "02",
-        "industryProjectsCount": "02",
-        "domainProjectsCount": "02",
-        "hackathonsFirstCount": "03",
-        "hackathonsSecondCount": 0,
-        "hackathonsThirdCount": 0,
-        "hackathonsParticipationCount": "2"
-      },
-      "communities": [
-        "RBU-5861",
-        "RBU-6843"
-      ],
-      "incomingInvites": [
-        {
-          "code": "RBU-6843",
-          "communityName": "dsf",
-          "invitedAt": "2026-10-23T23:21:59.416Z"
-        }
-      ],
-      "latestScore": {
-        "overallScore": null,
-        "rbuPlacement": {
-          "totalScore": 65,
-          "breakdown": {
-            "academics": {
-              "s10": 5,
-              "s12": 5,
-              "sCgpa": 5,
-              "total": 15,
-              "max": 15
-            },
-            "github": {
-              "contributions": 0,
-              "collaborations": 0,
-              "frequency": 0,
-              "total": 0,
-              "max": 15
-            },
-            "codingPlatforms": {
-              "badges": 0,
-              "mediumHard": 0,
-              "leetcode": 0,
-              "totalBadgesCount": 0,
-              "totalMedHardSolved": 0,
-              "leetcodeSolved": 0,
-              "total": 0,
-              "max": 20
-            },
-            "internships": {
-              "total": 10,
-              "max": 10
-            },
-            "certifications": {
-              "global": 10,
-              "nptel": 0,
-              "rbu": 6,
-              "total": 15,
-              "max": 15
-            },
-            "projects": {
-              "industry": 10,
-              "domain": 8,
-              "total": 15,
-              "max": 15
-            },
-            "hackathons": {
-              "total": 10,
-              "max": 10
-            }
-          }
-        },
-        "lastUpdated": "2026-10-23T23:51:03.686Z",
-        "dataConfidence": {
-          "platformsAvailable": 0,
-          "platformsRequested": 5,
-          "label": "limited signal"
-        },
-        "platformSummaries": [
-          {
-            "platform": "leetcode",
-            "available": false,
-            "username": "Pragnya_15",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
-          },
-          {
-            "platform": "codeforces",
-            "available": false,
-            "username": "Pragnya_15_",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
-          },
-          {
-            "platform": "github",
-            "available": false,
-            "username": "air",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
-          },
-          {
-            "platform": "codechef",
-            "available": false,
-            "username": "piyush",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
-          },
-          {
-            "platform": "hackerrank",
-            "available": false,
-            "username": "piyush",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
-          }
-        ],
-        "topicMastery": {
-          "Arrays & Strings": 0,
-          "Hashing": 0,
-          "Sorting & Searching": 0,
-          "Linked Lists": 0,
-          "Stacks & Queues": 0,
-          "Trees": 0,
-          "Graphs": 0,
-          "Dynamic Programming": 0,
-          "Greedy": 0,
-          "Backtracking": 0,
-          "Math & Number Theory": 0,
-          "Divide & Conquer": 0,
-          "Design & OOP": 0,
-          "Strings & Pattern Matching": 0,
-          "Simulation": 0
-        },
-        "swot": {
-          "strengths": [],
-          "weaknesses": [],
-          "opportunities": [
-            {
-              "topic": "Arrays & Strings",
-              "score": 0
-            },
-            {
-              "topic": "Hashing",
-              "score": 0
-            },
-            {
-              "topic": "Sorting & Searching",
-              "score": 0
-            },
-            {
-              "topic": "Linked Lists",
-              "score": 0
-            },
-            {
-              "topic": "Stacks & Queues",
-              "score": 0
-            },
-            {
-              "topic": "Greedy",
-              "score": 0
-            },
-            {
-              "topic": "Math & Number Theory",
-              "score": 0
-            },
-            {
-              "topic": "Divide & Conquer",
-              "score": 0
-            },
-            {
-              "topic": "Strings & Pattern Matching",
-              "score": 0
-            },
-            {
-              "topic": "Simulation",
-              "score": 0
-            }
-          ],
-          "threats": [
-            {
-              "topic": "Trees",
-              "score": 0
-            },
-            {
-              "topic": "Graphs",
-              "score": 0
-            },
-            {
-              "topic": "Dynamic Programming",
-              "score": 0
-            },
-            {
-              "topic": "Backtracking",
-              "score": 0
-            },
-            {
-              "topic": "Design & OOP",
-              "score": 0
-            }
-          ]
-        },
-        "difficultyProfile": {
-          "totals": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
-          },
-          "total": 0,
-          "percentages": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
-          }
-        },
-        "contestPerformance": {
-          "byPlatform": {},
-          "total": 0
-        },
-        "languageAnalysis": []
-      },
-      "rankingHistory": {
-        "prevGlobal": 1,
-        "prevCommunity": 1,
-        "lastGlobalDelta": 0,
-        "lastCommunityDelta": 0
-      },
-      "rankings": {
-        "globalRank": 1,
-        "globalTotal": 3,
-        "primaryCommunity": "RBU-5861",
-        "communityRank": 1,
-        "allCommunityRanks": [
-          {
-            "rank": 1,
-            "totalMembers": 2,
-            "communityName": "Faculty",
-            "communityCode": "RBU-5861"
-          },
-          {
-            "rank": 1,
-            "totalMembers": 3,
-            "communityName": "dsf",
-            "communityCode": "RBU-6843"
-          }
-        ]
-      }
-    },
-    {
-      "id": "usr_1792786907750",
-      "name": "Faculty",
-      "email": "asdf",
-      "username": "lowkeyme",
-      "password": "melowkey",
-      "role": "community",
-      "createdAt": "2026-10-23T20:21:47.750Z",
-      "communityCode": "RBU-5861",
-      "members": [
-        "pragnya_17_",
-        "lowkeyme1"
-      ],
-      "pendingRequests": []
-    },
-    {
-      "id": "usr_1792787014767",
-      "name": "dsf",
-      "email": "as",
-      "username": "lowkeyme1",
-      "password": "melowkey",
-      "role": "candidate",
-      "createdAt": "2026-10-23T20:23:34.767Z",
-      "links": {
-        "leetcode": "https://leetcode.com/u/NndXnavQeY/",
-        "codeforces": "https://codeforces.com/profile/_O_v_O_",
-        "github": "https://github.com/bro"
-      },
-      "lockedLinks": [
-        "leetcode",
-        "codeforces",
-        "github"
-      ],
-      "academics": {
-        "tenthPercentage": "90",
-        "twelfthPercentage": "85.2",
-        "cgpa": "8.81"
-      },
-      "institutionalExperience": {
-        "internationalInternship": false,
-        "reputedInternshipsCount": "02",
+        "reputedInternshipsCount": 0,
         "eduskillsInternshipsCount": 0,
         "stipendAbove10k": false,
-        "globalCertsCount": 0,
+        "globalCertsCount": "5",
         "nptelCoursesCount": 0,
         "rbuOnlineCoursesCount": 0,
-        "industryProjectsCount": "03",
+        "industryProjectsCount": "0",
         "domainProjectsCount": 0,
-        "hackathonsFirstCount": "02",
-        "hackathonsSecondCount": 0,
+        "hackathonsFirstCount": "1",
+        "hackathonsSecondCount": "3",
         "hackathonsThirdCount": 0,
         "hackathonsParticipationCount": 0
       },
       "communities": [
-        "RBU-5861",
-        "RBU-6843"
+        "RBU-8773",
+        "RBU-9906"
       ],
       "incomingInvites": [],
       "latestScore": {
-        "overallScore": null,
+        "overallScore": 19.7,
         "rbuPlacement": {
-          "totalScore": 50,
+          "totalScore": 42,
           "breakdown": {
             "academics": {
-              "s10": 5,
-              "s12": 5,
-              "sCgpa": 5,
-              "total": 15,
+              "s10": 0,
+              "s12": 0,
+              "sCgpa": 0,
+              "total": 0,
               "max": 15
             },
             "github": {
@@ -362,30 +80,30 @@
               "max": 15
             },
             "codingPlatforms": {
-              "badges": 0,
-              "mediumHard": 0,
-              "leetcode": 0,
-              "totalBadgesCount": 0,
-              "totalMedHardSolved": 0,
-              "leetcodeSolved": 0,
-              "total": 0,
+              "badges": 5,
+              "mediumHard": 5,
+              "leetcode": 7,
+              "totalBadgesCount": 11,
+              "totalMedHardSolved": 109,
+              "leetcodeSolved": 122,
+              "total": 17,
               "max": 20
             },
             "internships": {
-              "total": 10,
+              "total": 0,
               "max": 10
             },
             "certifications": {
-              "global": 0,
+              "global": 25,
               "nptel": 0,
               "rbu": 0,
-              "total": 0,
+              "total": 15,
               "max": 15
             },
             "projects": {
-              "industry": 15,
+              "industry": 0,
               "domain": 0,
-              "total": 15,
+              "total": 0,
               "max": 15
             },
             "hackathons": {
@@ -394,197 +112,308 @@
             }
           }
         },
-        "lastUpdated": "2026-10-23T23:51:03.710Z",
+        "lastUpdated": "2026-10-24T07:17:55.283Z",
         "dataConfidence": {
-          "platformsAvailable": 0,
+          "platformsAvailable": 3,
           "platformsRequested": 3,
-          "label": "limited signal"
+          "label": "strong signal"
         },
         "platformSummaries": [
           {
             "platform": "leetcode",
-            "available": false,
-            "username": "NndXnavQeY",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
+            "available": true,
+            "username": "Pragnya_15",
+            "platformScore": 39.1,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving (50 Pts)",
+                "max": 50,
+                "points": 21.6,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (20 Pts)",
+                "max": 20,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 4,
+                "available": true
+              }
+            ],
+            "problemsSolved": 122
           },
           {
             "platform": "codeforces",
-            "available": false,
-            "username": "_O_v_O_",
-            "platformScore": null,
-            "scoreBreakdown": [],
-            "problemsSolved": null
+            "available": true,
+            "username": "Pragnya_15_",
+            "platformScore": 2.7,
+            "scoreBreakdown": [
+              {
+                "key": "rating",
+                "label": "Rating / Rank (40 Pts)",
+                "max": 40,
+                "available": false
+              },
+              {
+                "key": "problems",
+                "label": "Problem-Solving Metrics (25 Pts)",
+                "max": 25,
+                "points": 0.8,
+                "available": true
+              },
+              {
+                "key": "contests",
+                "label": "Contest Activity (15 Pts)",
+                "max": 15,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "consistency",
+                "label": "Profile Consistency (5 Pts)",
+                "max": 5,
+                "points": 0.4,
+                "available": true
+              }
+            ],
+            "problemsSolved": 12
           },
           {
-            "platform": "github",
-            "available": false,
-            "username": "bro",
-            "platformScore": null,
-            "scoreBreakdown": [],
+            "platform": "hackerrank",
+            "available": true,
+            "username": "piyush",
+            "platformScore": 40.3,
+            "scoreBreakdown": [
+              {
+                "key": "badges",
+                "label": "Skill Badges (35 Pts)",
+                "max": 35,
+                "points": 24.2,
+                "available": true
+              },
+              {
+                "key": "medals",
+                "label": "Medals (25 Pts)",
+                "max": 25,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "problems",
+                "label": "Verified Solves (40 Pts)",
+                "max": 40,
+                "available": false
+              }
+            ],
             "problemsSolved": null
           }
         ],
         "topicMastery": {
-          "Arrays & Strings": 0,
-          "Hashing": 0,
-          "Sorting & Searching": 0,
-          "Linked Lists": 0,
-          "Stacks & Queues": 0,
-          "Trees": 0,
-          "Graphs": 0,
-          "Dynamic Programming": 0,
-          "Greedy": 0,
-          "Backtracking": 0,
-          "Math & Number Theory": 0,
-          "Divide & Conquer": 0,
-          "Design & OOP": 0,
+          "Arrays & Strings": 100,
+          "Hashing": 20,
+          "Sorting & Searching": 31,
+          "Linked Lists": 6,
+          "Stacks & Queues": 20,
+          "Trees": 34,
+          "Graphs": 2,
+          "Dynamic Programming": 69,
+          "Greedy": 8,
+          "Backtracking": 43,
+          "Math & Number Theory": 34,
+          "Divide & Conquer": 26,
+          "Design & OOP": 6,
           "Strings & Pattern Matching": 0,
-          "Simulation": 0
+          "Simulation": 4
         },
         "swot": {
-          "strengths": [],
-          "weaknesses": [],
-          "opportunities": [
+          "strengths": [
             {
               "topic": "Arrays & Strings",
-              "score": 0
+              "score": 100
+            }
+          ],
+          "weaknesses": [
+            {
+              "topic": "Dynamic Programming",
+              "score": 69
             },
             {
-              "topic": "Hashing",
-              "score": 0
+              "topic": "Backtracking",
+              "score": 43
             },
             {
-              "topic": "Sorting & Searching",
-              "score": 0
-            },
-            {
-              "topic": "Linked Lists",
-              "score": 0
-            },
-            {
-              "topic": "Stacks & Queues",
-              "score": 0
-            },
-            {
-              "topic": "Greedy",
-              "score": 0
+              "topic": "Trees",
+              "score": 34
             },
             {
               "topic": "Math & Number Theory",
-              "score": 0
+              "score": 34
             },
+            {
+              "topic": "Sorting & Searching",
+              "score": 31
+            }
+          ],
+          "opportunities": [
             {
               "topic": "Divide & Conquer",
-              "score": 0
+              "score": 26
             },
             {
-              "topic": "Strings & Pattern Matching",
-              "score": 0
+              "topic": "Hashing",
+              "score": 20
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 20
+            },
+            {
+              "topic": "Greedy",
+              "score": 8
+            },
+            {
+              "topic": "Linked Lists",
+              "score": 6
             },
             {
               "topic": "Simulation",
+              "score": 4
+            },
+            {
+              "topic": "Strings & Pattern Matching",
               "score": 0
             }
           ],
           "threats": [
             {
-              "topic": "Trees",
-              "score": 0
+              "topic": "Design & OOP",
+              "score": 6
             },
             {
               "topic": "Graphs",
-              "score": 0
-            },
-            {
-              "topic": "Dynamic Programming",
-              "score": 0
-            },
-            {
-              "topic": "Backtracking",
-              "score": 0
-            },
-            {
-              "topic": "Design & OOP",
-              "score": 0
+              "score": 2
             }
           ]
         },
         "difficultyProfile": {
           "totals": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
+            "easy": 25,
+            "medium": 73,
+            "hard": 36
           },
-          "total": 0,
+          "total": 134,
           "percentages": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
+            "easy": 18.7,
+            "medium": 54.5,
+            "hard": 26.9
           }
         },
         "contestPerformance": {
-          "byPlatform": {},
+          "byPlatform": {
+            "leetcode": null,
+            "codeforces": 0,
+            "hackerrank": null
+          },
           "total": 0
         },
-        "languageAnalysis": []
-      },
-      "rankingHistory": {
-        "prevGlobal": 2,
-        "prevCommunity": 2,
-        "lastGlobalDelta": 0,
-        "lastCommunityDelta": 0
-      },
-      "rankings": {
-        "globalRank": 2,
-        "globalTotal": 3,
-        "primaryCommunity": "RBU-5861",
-        "communityRank": 2,
-        "allCommunityRanks": [
+        "languageAnalysis": [
           {
-            "rank": 2,
-            "totalMembers": 2,
-            "communityName": "Faculty",
-            "communityCode": "RBU-5861"
+            "language": "C",
+            "count": 81
           },
           {
-            "rank": 2,
-            "totalMembers": 3,
-            "communityName": "dsf",
-            "communityCode": "RBU-6843"
+            "language": "Python",
+            "count": 39
+          },
+          {
+            "language": "C++",
+            "count": 10
+          },
+          {
+            "language": "GNU C11",
+            "count": 10
+          },
+          {
+            "language": "Java",
+            "count": 1
+          },
+          {
+            "language": "Python3",
+            "count": 1
+          },
+          {
+            "language": "Java 21",
+            "count": 1
+          },
+          {
+            "language": "Python 3",
+            "count": 1
+          }
+        ]
+      },
+      "rankings": {
+        "globalRank": 5,
+        "globalTotal": 5,
+        "primaryCommunity": "RBU-8773",
+        "communityRank": 1,
+        "allCommunityRanks": [
+          {
+            "rank": 1,
+            "totalMembers": 1,
+            "communityName": "RBU test case 1",
+            "communityCode": "RBU-8773"
+          },
+          {
+            "rank": 4,
+            "totalMembers": 4,
+            "communityName": "ssssss",
+            "communityCode": "RBU-9906"
           }
         ]
       }
     },
     {
-      "id": "usr_1792797701006",
-      "name": "dsf",
-      "email": "sf",
-      "username": "lowkeyme2",
+      "id": "usr_1792818801880",
+      "name": "RBU test case 1",
+      "email": "dhf",
+      "username": "testcase1",
       "password": "melowkey",
       "role": "community",
-      "createdAt": "2026-10-23T23:21:41.006Z",
-      "communityCode": "RBU-6843",
+      "createdAt": "2026-10-24T05:13:21.880Z",
+      "communityCode": "RBU-8773",
       "members": [
-        "pragnya_17_",
-        "lowkeyme1",
-        "pragnya_18_"
+        "lowkeyme2"
       ],
       "pendingRequests": []
     },
     {
-      "id": "usr_1792798052458",
-      "name": "df",
-      "email": "alefhk",
-      "username": "pragnya_18_",
-      "password": "Hello",
+      "id": "usr_1792820564688",
+      "name": "Hiii",
+      "email": "dkh",
+      "username": "lowkeyme1",
+      "password": "melowkey",
       "role": "candidate",
-      "createdAt": "2026-10-23T23:27:32.458Z",
+      "createdAt": "2026-10-24T05:42:44.707Z",
       "links": {
-        "github": "dd"
+        "leetcode": "https://leetcode.com/u/NndXnavQeY/",
+        "github": "https://github.com/dd"
       },
       "lockedLinks": [
+        "leetcode",
         "github"
       ],
       "academics": {
@@ -607,14 +436,12 @@
         "hackathonsThirdCount": 0,
         "hackathonsParticipationCount": 0
       },
-      "communities": [
-        "RBU-6843"
-      ],
+      "communities": [],
       "incomingInvites": [],
       "latestScore": {
-        "overallScore": null,
+        "overallScore": 67.1,
         "rbuPlacement": {
-          "totalScore": 0,
+          "totalScore": 25,
           "breakdown": {
             "academics": {
               "s10": 0,
@@ -624,20 +451,20 @@
               "max": 15
             },
             "github": {
-              "contributions": 0,
-              "collaborations": 0,
+              "contributions": 5,
+              "collaborations": 6,
               "frequency": 0,
-              "total": 0,
+              "total": 11,
               "max": 15
             },
             "codingPlatforms": {
-              "badges": 0,
-              "mediumHard": 0,
-              "leetcode": 0,
-              "totalBadgesCount": 0,
-              "totalMedHardSolved": 0,
-              "leetcodeSolved": 0,
-              "total": 0,
+              "badges": 1,
+              "mediumHard": 5,
+              "leetcode": 8,
+              "totalBadgesCount": 1,
+              "totalMedHardSolved": 136,
+              "leetcodeSolved": 186,
+              "total": 14,
               "max": 20
             },
             "internships": {
@@ -663,143 +490,1132 @@
             }
           }
         },
-        "lastUpdated": "2026-10-23T23:51:03.731Z",
+        "lastUpdated": "2026-10-24T06:10:50.589Z",
         "dataConfidence": {
-          "platformsAvailable": 0,
-          "platformsRequested": 1,
+          "platformsAvailable": 2,
+          "platformsRequested": 2,
+          "label": "moderate signal"
+        },
+        "platformSummaries": [
+          {
+            "platform": "leetcode",
+            "available": true,
+            "username": "NndXnavQeY",
+            "platformScore": 49.2,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving (50 Pts)",
+                "max": 50,
+                "points": 27.7,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (20 Pts)",
+                "max": 20,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 7,
+                "available": true
+              }
+            ],
+            "problemsSolved": 186
+          },
+          {
+            "platform": "github",
+            "available": true,
+            "username": "dd",
+            "platformScore": 85,
+            "scoreBreakdown": [
+              {
+                "key": "repos",
+                "label": "Repositories (25 Pts)",
+                "max": 25,
+                "points": 25,
+                "available": true
+              },
+              {
+                "key": "stars",
+                "label": "Stargazers (30 Pts)",
+                "max": 30,
+                "points": 18,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Languages (25 Pts)",
+                "max": 25,
+                "points": 25,
+                "available": true
+              },
+              {
+                "key": "community",
+                "label": "Followers & Reach (20 Pts)",
+                "max": 20,
+                "available": false
+              }
+            ],
+            "problemsSolved": 32
+          }
+        ],
+        "topicMastery": {
+          "Arrays & Strings": 100,
+          "Hashing": 33,
+          "Sorting & Searching": 36,
+          "Linked Lists": 11,
+          "Stacks & Queues": 22,
+          "Trees": 68,
+          "Graphs": 4,
+          "Dynamic Programming": 66,
+          "Greedy": 14,
+          "Backtracking": 39,
+          "Math & Number Theory": 31,
+          "Divide & Conquer": 25,
+          "Design & OOP": 10,
+          "Strings & Pattern Matching": 0,
+          "Simulation": 5
+        },
+        "swot": {
+          "strengths": [
+            {
+              "topic": "Arrays & Strings",
+              "score": 100
+            }
+          ],
+          "weaknesses": [
+            {
+              "topic": "Trees",
+              "score": 68
+            },
+            {
+              "topic": "Dynamic Programming",
+              "score": 66
+            },
+            {
+              "topic": "Backtracking",
+              "score": 39
+            },
+            {
+              "topic": "Sorting & Searching",
+              "score": 36
+            },
+            {
+              "topic": "Hashing",
+              "score": 33
+            },
+            {
+              "topic": "Math & Number Theory",
+              "score": 31
+            }
+          ],
+          "opportunities": [
+            {
+              "topic": "Divide & Conquer",
+              "score": 25
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 22
+            },
+            {
+              "topic": "Greedy",
+              "score": 14
+            },
+            {
+              "topic": "Linked Lists",
+              "score": 11
+            },
+            {
+              "topic": "Simulation",
+              "score": 5
+            },
+            {
+              "topic": "Strings & Pattern Matching",
+              "score": 0
+            }
+          ],
+          "threats": [
+            {
+              "topic": "Design & OOP",
+              "score": 10
+            },
+            {
+              "topic": "Graphs",
+              "score": 4
+            }
+          ]
+        },
+        "difficultyProfile": {
+          "totals": {
+            "easy": 50,
+            "medium": 103,
+            "hard": 33
+          },
+          "total": 186,
+          "percentages": {
+            "easy": 26.9,
+            "medium": 55.4,
+            "hard": 17.7
+          }
+        },
+        "contestPerformance": {
+          "byPlatform": {
+            "leetcode": null,
+            "github": null
+          },
+          "total": 0
+        },
+        "languageAnalysis": [
+          {
+            "language": "Java",
+            "count": 90
+          },
+          {
+            "language": "C",
+            "count": 90
+          },
+          {
+            "language": "Python",
+            "count": 23
+          },
+          {
+            "language": "JavaScript",
+            "count": 6
+          },
+          {
+            "language": "Vue",
+            "count": 2
+          },
+          {
+            "language": "MySQL",
+            "count": 1
+          },
+          {
+            "language": "Shell",
+            "count": 1
+          },
+          {
+            "language": "TypeScript",
+            "count": 1
+          },
+          {
+            "language": "HTML",
+            "count": 1
+          }
+        ]
+      },
+      "rankings": {
+        "globalRank": 1,
+        "globalTotal": 3,
+        "primaryCommunity": null,
+        "communityRank": null,
+        "allCommunityRanks": []
+      }
+    },
+    {
+      "id": "usr_1792821133146",
+      "name": "Omair test",
+      "email": "test1",
+      "username": "codeair",
+      "password": "1234",
+      "role": "candidate",
+      "createdAt": "2026-10-24T05:52:13.146Z",
+      "links": {
+        "github": "https://github.com/codeair1",
+        "leetcode": "https://leetcode.com/u/24hussainm/"
+      },
+      "lockedLinks": [
+        "github",
+        "leetcode"
+      ],
+      "academics": {
+        "tenthPercentage": "76.6",
+        "twelfthPercentage": "77.6",
+        "cgpa": "8.57"
+      },
+      "institutionalExperience": {
+        "internationalInternship": false,
+        "reputedInternshipsCount": 0,
+        "eduskillsInternshipsCount": 0,
+        "stipendAbove10k": false,
+        "globalCertsCount": 0,
+        "nptelCoursesCount": 0,
+        "rbuOnlineCoursesCount": "2",
+        "industryProjectsCount": "2",
+        "domainProjectsCount": "3",
+        "hackathonsFirstCount": "",
+        "hackathonsSecondCount": 0,
+        "hackathonsThirdCount": 0,
+        "hackathonsParticipationCount": "5"
+      },
+      "communities": [
+        "RBU-9906"
+      ],
+      "incomingInvites": [],
+      "latestScore": {
+        "overallScore": 42.1,
+        "rbuPlacement": {
+          "totalScore": 58,
+          "breakdown": {
+            "academics": {
+              "s10": 4,
+              "s12": 4,
+              "sCgpa": 5,
+              "total": 13,
+              "max": 15
+            },
+            "github": {
+              "contributions": 0,
+              "collaborations": 0,
+              "frequency": 0,
+              "total": 0,
+              "max": 15
+            },
+            "codingPlatforms": {
+              "badges": 1,
+              "mediumHard": 5,
+              "leetcode": 8,
+              "totalBadgesCount": 1,
+              "totalMedHardSolved": 110,
+              "leetcodeSolved": 156,
+              "total": 14,
+              "max": 20
+            },
+            "internships": {
+              "total": 0,
+              "max": 10
+            },
+            "certifications": {
+              "global": 0,
+              "nptel": 0,
+              "rbu": 6,
+              "total": 6,
+              "max": 15
+            },
+            "projects": {
+              "industry": 10,
+              "domain": 12,
+              "total": 15,
+              "max": 15
+            },
+            "hackathons": {
+              "total": 10,
+              "max": 10
+            }
+          }
+        },
+        "lastUpdated": "2026-10-24T07:17:55.310Z",
+        "dataConfidence": {
+          "platformsAvailable": 1,
+          "platformsRequested": 2,
           "label": "limited signal"
         },
         "platformSummaries": [
           {
             "platform": "github",
             "available": false,
-            "username": "dd",
+            "username": "codeair1",
+            "platformScore": null,
+            "scoreBreakdown": [],
+            "problemsSolved": null
+          },
+          {
+            "platform": "leetcode",
+            "available": true,
+            "username": "24hussainm",
+            "platformScore": 42.1,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving (50 Pts)",
+                "max": 50,
+                "points": 23.7,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (20 Pts)",
+                "max": 20,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 4.6,
+                "available": true
+              }
+            ],
+            "problemsSolved": 156
+          }
+        ],
+        "topicMastery": {
+          "Arrays & Strings": 100,
+          "Hashing": 24,
+          "Sorting & Searching": 58,
+          "Linked Lists": 5,
+          "Stacks & Queues": 21,
+          "Trees": 56,
+          "Graphs": 6,
+          "Dynamic Programming": 56,
+          "Greedy": 30,
+          "Backtracking": 22,
+          "Math & Number Theory": 54,
+          "Divide & Conquer": 33,
+          "Design & OOP": 6,
+          "Strings & Pattern Matching": 0,
+          "Simulation": 5
+        },
+        "swot": {
+          "strengths": [
+            {
+              "topic": "Arrays & Strings",
+              "score": 100
+            }
+          ],
+          "weaknesses": [
+            {
+              "topic": "Sorting & Searching",
+              "score": 58
+            },
+            {
+              "topic": "Trees",
+              "score": 56
+            },
+            {
+              "topic": "Dynamic Programming",
+              "score": 56
+            },
+            {
+              "topic": "Math & Number Theory",
+              "score": 54
+            },
+            {
+              "topic": "Divide & Conquer",
+              "score": 33
+            },
+            {
+              "topic": "Greedy",
+              "score": 30
+            }
+          ],
+          "opportunities": [
+            {
+              "topic": "Hashing",
+              "score": 24
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 21
+            },
+            {
+              "topic": "Linked Lists",
+              "score": 5
+            },
+            {
+              "topic": "Simulation",
+              "score": 5
+            },
+            {
+              "topic": "Strings & Pattern Matching",
+              "score": 0
+            }
+          ],
+          "threats": [
+            {
+              "topic": "Backtracking",
+              "score": 22
+            },
+            {
+              "topic": "Graphs",
+              "score": 6
+            },
+            {
+              "topic": "Design & OOP",
+              "score": 6
+            }
+          ]
+        },
+        "difficultyProfile": {
+          "totals": {
+            "easy": 46,
+            "medium": 77,
+            "hard": 33
+          },
+          "total": 156,
+          "percentages": {
+            "easy": 29.5,
+            "medium": 49.4,
+            "hard": 21.2
+          }
+        },
+        "contestPerformance": {
+          "byPlatform": {
+            "leetcode": null
+          },
+          "total": 0
+        },
+        "languageAnalysis": [
+          {
+            "language": "Python3",
+            "count": 78
+          },
+          {
+            "language": "MySQL",
+            "count": 49
+          },
+          {
+            "language": "Python",
+            "count": 35
+          },
+          {
+            "language": "C++",
+            "count": 1
+          },
+          {
+            "language": "PostgreSQL",
+            "count": 1
+          }
+        ]
+      },
+      "rankings": {
+        "globalRank": 3,
+        "globalTotal": 5,
+        "primaryCommunity": "RBU-9906",
+        "communityRank": 2,
+        "allCommunityRanks": [
+          {
+            "rank": 2,
+            "totalMembers": 4,
+            "communityName": "ssssss",
+            "communityCode": "RBU-9906"
+          }
+        ]
+      }
+    },
+    {
+      "id": "usr_1792822387161",
+      "name": "Rudrani",
+      "email": "dklafh",
+      "username": "kyubeyrud",
+      "password": "rud",
+      "role": "candidate",
+      "createdAt": "2026-10-24T06:13:07.161Z",
+      "links": {
+        "leetcode": "https://leetcode.com/u/rudrani_deshpande/",
+        "github": "https://github.com/rudranideshpande"
+      },
+      "lockedLinks": [
+        "leetcode",
+        "github"
+      ],
+      "academics": {
+        "tenthPercentage": "97",
+        "twelfthPercentage": "74",
+        "cgpa": "8.5"
+      },
+      "institutionalExperience": {
+        "internationalInternship": false,
+        "reputedInternshipsCount": 0,
+        "eduskillsInternshipsCount": 0,
+        "stipendAbove10k": false,
+        "globalCertsCount": 0,
+        "nptelCoursesCount": 0,
+        "rbuOnlineCoursesCount": "2",
+        "industryProjectsCount": "2",
+        "domainProjectsCount": "2",
+        "hackathonsFirstCount": 0,
+        "hackathonsSecondCount": 0,
+        "hackathonsThirdCount": 0,
+        "hackathonsParticipationCount": "3"
+      },
+      "communities": [
+        "RBU-9906"
+      ],
+      "incomingInvites": [],
+      "latestScore": {
+        "overallScore": 43.6,
+        "rbuPlacement": {
+          "totalScore": 54,
+          "breakdown": {
+            "academics": {
+              "s10": 5,
+              "s12": 3,
+              "sCgpa": 5,
+              "total": 13,
+              "max": 15
+            },
+            "github": {
+              "contributions": 0,
+              "collaborations": 0,
+              "frequency": 0,
+              "total": 0,
+              "max": 15
+            },
+            "codingPlatforms": {
+              "badges": 1,
+              "mediumHard": 5,
+              "leetcode": 8,
+              "totalBadgesCount": 1,
+              "totalMedHardSolved": 115,
+              "leetcodeSolved": 161,
+              "total": 14,
+              "max": 20
+            },
+            "internships": {
+              "total": 0,
+              "max": 10
+            },
+            "certifications": {
+              "global": 0,
+              "nptel": 0,
+              "rbu": 6,
+              "total": 6,
+              "max": 15
+            },
+            "projects": {
+              "industry": 10,
+              "domain": 8,
+              "total": 15,
+              "max": 15
+            },
+            "hackathons": {
+              "total": 6,
+              "max": 10
+            }
+          }
+        },
+        "lastUpdated": "2026-10-24T07:17:55.287Z",
+        "dataConfidence": {
+          "platformsAvailable": 1,
+          "platformsRequested": 2,
+          "label": "limited signal"
+        },
+        "platformSummaries": [
+          {
+            "platform": "leetcode",
+            "available": true,
+            "username": "rudrani_deshpande",
+            "platformScore": 43.6,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving (50 Pts)",
+                "max": 50,
+                "points": 24.9,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (20 Pts)",
+                "max": 20,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 4.8,
+                "available": true
+              }
+            ],
+            "problemsSolved": 161
+          },
+          {
+            "platform": "github",
+            "available": false,
+            "username": "rudranideshpande",
             "platformScore": null,
             "scoreBreakdown": [],
             "problemsSolved": null
           }
         ],
         "topicMastery": {
-          "Arrays & Strings": 0,
-          "Hashing": 0,
-          "Sorting & Searching": 0,
-          "Linked Lists": 0,
-          "Stacks & Queues": 0,
-          "Trees": 0,
-          "Graphs": 0,
-          "Dynamic Programming": 0,
-          "Greedy": 0,
-          "Backtracking": 0,
-          "Math & Number Theory": 0,
-          "Divide & Conquer": 0,
-          "Design & OOP": 0,
+          "Arrays & Strings": 100,
+          "Hashing": 21,
+          "Sorting & Searching": 46,
+          "Linked Lists": 8,
+          "Stacks & Queues": 20,
+          "Trees": 36,
+          "Graphs": 3,
+          "Dynamic Programming": 74,
+          "Greedy": 23,
+          "Backtracking": 64,
+          "Math & Number Theory": 64,
+          "Divide & Conquer": 20,
+          "Design & OOP": 8,
           "Strings & Pattern Matching": 0,
-          "Simulation": 0
+          "Simulation": 5
         },
         "swot": {
-          "strengths": [],
-          "weaknesses": [],
-          "opportunities": [
+          "strengths": [
             {
               "topic": "Arrays & Strings",
-              "score": 0
+              "score": 100
             },
             {
-              "topic": "Hashing",
-              "score": 0
-            },
+              "topic": "Dynamic Programming",
+              "score": 74
+            }
+          ],
+          "weaknesses": [
             {
-              "topic": "Sorting & Searching",
-              "score": 0
-            },
-            {
-              "topic": "Linked Lists",
-              "score": 0
-            },
-            {
-              "topic": "Stacks & Queues",
-              "score": 0
-            },
-            {
-              "topic": "Greedy",
-              "score": 0
+              "topic": "Backtracking",
+              "score": 64
             },
             {
               "topic": "Math & Number Theory",
-              "score": 0
+              "score": 64
+            },
+            {
+              "topic": "Sorting & Searching",
+              "score": 46
+            },
+            {
+              "topic": "Trees",
+              "score": 36
+            }
+          ],
+          "opportunities": [
+            {
+              "topic": "Greedy",
+              "score": 23
+            },
+            {
+              "topic": "Hashing",
+              "score": 21
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 20
             },
             {
               "topic": "Divide & Conquer",
-              "score": 0
+              "score": 20
             },
             {
-              "topic": "Strings & Pattern Matching",
-              "score": 0
+              "topic": "Linked Lists",
+              "score": 8
             },
             {
               "topic": "Simulation",
+              "score": 5
+            },
+            {
+              "topic": "Strings & Pattern Matching",
               "score": 0
             }
           ],
           "threats": [
             {
-              "topic": "Trees",
-              "score": 0
+              "topic": "Design & OOP",
+              "score": 8
             },
             {
               "topic": "Graphs",
-              "score": 0
-            },
-            {
-              "topic": "Dynamic Programming",
-              "score": 0
-            },
-            {
-              "topic": "Backtracking",
-              "score": 0
-            },
-            {
-              "topic": "Design & OOP",
-              "score": 0
+              "score": 3
             }
           ]
         },
         "difficultyProfile": {
           "totals": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
+            "easy": 46,
+            "medium": 79,
+            "hard": 36
           },
-          "total": 0,
+          "total": 161,
           "percentages": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
+            "easy": 28.6,
+            "medium": 49.1,
+            "hard": 22.4
           }
         },
         "contestPerformance": {
-          "byPlatform": {},
+          "byPlatform": {
+            "leetcode": null
+          },
           "total": 0
         },
-        "languageAnalysis": []
-      },
-      "rankingHistory": {
-        "prevGlobal": 3,
-        "prevCommunity": 1,
-        "lastGlobalDelta": 0,
-        "lastCommunityDelta": 0
+        "languageAnalysis": [
+          {
+            "language": "C",
+            "count": 91
+          },
+          {
+            "language": "MySQL",
+            "count": 50
+          },
+          {
+            "language": "Python",
+            "count": 19
+          },
+          {
+            "language": "C++",
+            "count": 3
+          }
+        ]
       },
       "rankings": {
-        "globalRank": 3,
-        "globalTotal": 3,
-        "primaryCommunity": "RBU-6843",
+        "globalRank": 2,
+        "globalTotal": 5,
+        "primaryCommunity": "RBU-9906",
         "communityRank": 3,
         "allCommunityRanks": [
           {
             "rank": 3,
-            "totalMembers": 3,
-            "communityName": "dsf",
-            "communityCode": "RBU-6843"
+            "totalMembers": 4,
+            "communityName": "ssssss",
+            "communityCode": "RBU-9906"
+          }
+        ]
+      }
+    },
+    {
+      "id": "usr_1792822548436",
+      "name": "Pragnya",
+      "email": "finally",
+      "username": "pragnya_17_",
+      "password": "Hello",
+      "role": "candidate",
+      "createdAt": "2026-10-24T06:15:48.436Z",
+      "links": {
+        "leetcode": "https://leetcode.com/u/Pragnya_15/",
+        "hackerrank": "https://www.hackerrank.com/profile/sowmya_mogalla",
+        "github": "https://github.com/PragnyaMogalla"
+      },
+      "lockedLinks": [
+        "leetcode",
+        "hackerrank",
+        "github"
+      ],
+      "academics": {
+        "tenthPercentage": "90",
+        "twelfthPercentage": "85",
+        "cgpa": "8.81"
+      },
+      "institutionalExperience": {
+        "internationalInternship": false,
+        "reputedInternshipsCount": "0",
+        "eduskillsInternshipsCount": "2",
+        "stipendAbove10k": true,
+        "globalCertsCount": 0,
+        "nptelCoursesCount": 0,
+        "rbuOnlineCoursesCount": "2",
+        "industryProjectsCount": "2",
+        "domainProjectsCount": "3",
+        "hackathonsFirstCount": "1",
+        "hackathonsSecondCount": 0,
+        "hackathonsThirdCount": 0,
+        "hackathonsParticipationCount": "2"
+      },
+      "communities": [
+        "RBU-9906"
+      ],
+      "incomingInvites": [],
+      "latestScore": {
+        "overallScore": 27.5,
+        "rbuPlacement": {
+          "totalScore": 68,
+          "breakdown": {
+            "academics": {
+              "s10": 5,
+              "s12": 5,
+              "sCgpa": 5,
+              "total": 15,
+              "max": 15
+            },
+            "github": {
+              "contributions": 0,
+              "collaborations": 0,
+              "frequency": 0,
+              "total": 0,
+              "max": 15
+            },
+            "codingPlatforms": {
+              "badges": 1,
+              "mediumHard": 5,
+              "leetcode": 7,
+              "totalBadgesCount": 1,
+              "totalMedHardSolved": 109,
+              "leetcodeSolved": 122,
+              "total": 13,
+              "max": 20
+            },
+            "internships": {
+              "total": 10,
+              "max": 10
+            },
+            "certifications": {
+              "global": 0,
+              "nptel": 0,
+              "rbu": 6,
+              "total": 6,
+              "max": 15
+            },
+            "projects": {
+              "industry": 10,
+              "domain": 12,
+              "total": 15,
+              "max": 15
+            },
+            "hackathons": {
+              "total": 9,
+              "max": 10
+            }
+          }
+        },
+        "lastUpdated": "2026-10-24T07:18:54.540Z",
+        "dataConfidence": {
+          "platformsAvailable": 2,
+          "platformsRequested": 3,
+          "label": "moderate signal"
+        },
+        "platformSummaries": [
+          {
+            "platform": "leetcode",
+            "available": true,
+            "username": "Pragnya_15",
+            "platformScore": 39.1,
+            "scoreBreakdown": [
+              {
+                "key": "problemsAndDifficulty",
+                "label": "Problem Solving (50 Pts)",
+                "max": 50,
+                "points": 21.6,
+                "available": true
+              },
+              {
+                "key": "contest",
+                "label": "Contest Metrics (20 Pts)",
+                "max": 20,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "diversity",
+                "label": "Diversity (10 Pts)",
+                "max": 10,
+                "points": 9.6,
+                "available": true
+              },
+              {
+                "key": "badgesAndConsistency",
+                "label": "Badges & Consistency (10 Pts)",
+                "max": 10,
+                "points": 4,
+                "available": true
+              }
+            ],
+            "problemsSolved": 122
+          },
+          {
+            "platform": "hackerrank",
+            "available": true,
+            "username": "sowmya_mogalla",
+            "platformScore": 4.2,
+            "scoreBreakdown": [
+              {
+                "key": "badges",
+                "label": "Skill Badges (35 Pts)",
+                "max": 35,
+                "points": 2.5,
+                "available": true
+              },
+              {
+                "key": "medals",
+                "label": "Medals (25 Pts)",
+                "max": 25,
+                "points": 0,
+                "available": true
+              },
+              {
+                "key": "problems",
+                "label": "Verified Solves (40 Pts)",
+                "max": 40,
+                "available": false
+              }
+            ],
+            "problemsSolved": null
+          },
+          {
+            "platform": "github",
+            "available": false,
+            "username": "PragnyaMogalla",
+            "platformScore": null,
+            "scoreBreakdown": [],
+            "problemsSolved": null
+          }
+        ],
+        "topicMastery": {
+          "Arrays & Strings": 100,
+          "Hashing": 25,
+          "Sorting & Searching": 39,
+          "Linked Lists": 7,
+          "Stacks & Queues": 25,
+          "Trees": 42,
+          "Graphs": 3,
+          "Dynamic Programming": 84,
+          "Greedy": 9,
+          "Backtracking": 47,
+          "Math & Number Theory": 34,
+          "Divide & Conquer": 32,
+          "Design & OOP": 7,
+          "Strings & Pattern Matching": 0,
+          "Simulation": 4
+        },
+        "swot": {
+          "strengths": [
+            {
+              "topic": "Arrays & Strings",
+              "score": 100
+            },
+            {
+              "topic": "Dynamic Programming",
+              "score": 84
+            }
+          ],
+          "weaknesses": [
+            {
+              "topic": "Backtracking",
+              "score": 47
+            },
+            {
+              "topic": "Trees",
+              "score": 42
+            },
+            {
+              "topic": "Sorting & Searching",
+              "score": 39
+            },
+            {
+              "topic": "Math & Number Theory",
+              "score": 34
+            },
+            {
+              "topic": "Divide & Conquer",
+              "score": 32
+            }
+          ],
+          "opportunities": [
+            {
+              "topic": "Hashing",
+              "score": 25
+            },
+            {
+              "topic": "Stacks & Queues",
+              "score": 25
+            },
+            {
+              "topic": "Greedy",
+              "score": 9
+            },
+            {
+              "topic": "Linked Lists",
+              "score": 7
+            },
+            {
+              "topic": "Simulation",
+              "score": 4
+            },
+            {
+              "topic": "Strings & Pattern Matching",
+              "score": 0
+            }
+          ],
+          "threats": [
+            {
+              "topic": "Design & OOP",
+              "score": 7
+            },
+            {
+              "topic": "Graphs",
+              "score": 3
+            }
+          ]
+        },
+        "difficultyProfile": {
+          "totals": {
+            "easy": 13,
+            "medium": 73,
+            "hard": 36
+          },
+          "total": 122,
+          "percentages": {
+            "easy": 10.7,
+            "medium": 59.8,
+            "hard": 29.5
+          }
+        },
+        "contestPerformance": {
+          "byPlatform": {
+            "leetcode": null,
+            "hackerrank": null
+          },
+          "total": 0
+        },
+        "languageAnalysis": [
+          {
+            "language": "C",
+            "count": 81
+          },
+          {
+            "language": "Python",
+            "count": 39
+          },
+          {
+            "language": "C++",
+            "count": 10
+          },
+          {
+            "language": "Java",
+            "count": 1
+          },
+          {
+            "language": "Python3",
+            "count": 1
+          }
+        ]
+      },
+      "rankings": {
+        "globalRank": 4,
+        "globalTotal": 5,
+        "primaryCommunity": "RBU-9906",
+        "communityRank": 1,
+        "allCommunityRanks": [
+          {
+            "rank": 1,
+            "totalMembers": 4,
+            "communityName": "ssssss",
+            "communityCode": "RBU-9906"
           }
         ]
       }

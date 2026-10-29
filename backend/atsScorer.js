@@ -106,11 +106,17 @@ export function auditResumeAgainstJob({ resumeText, jobDescription, targetRole, 
   const jd = (jobDescription || '').trim();
 
   let effectiveJd = jd;
-  if (!effectiveJd && targetRole && ROLE_PRESETS[targetRole]) {
-    effectiveJd = ROLE_PRESETS[targetRole].keywords.join(' ') + ' computer science software engineering data structures';
+  if (!effectiveJd && targetRole) {
+    const matchKey = Object.keys(ROLE_PRESETS).find(k => 
+      ROLE_PRESETS[k].title.toLowerCase().includes(targetRole.toLowerCase()) ||
+      targetRole.toLowerCase().includes(k)
+    );
+    if (matchKey) {
+      effectiveJd = ROLE_PRESETS[matchKey].keywords.join(' ') + ' software engineering data structures algorithms';
+    }
   }
   if (!effectiveJd) {
-    effectiveJd = 'software engineer data structures algorithms git github problem solving unit testing';
+    effectiveJd = 'software engineer data structures algorithms git github problem solving unit testing full stack';
   }
 
   const resumeTokens = extractSignificantTerms(resume);
@@ -133,7 +139,7 @@ export function auditResumeAgainstJob({ resumeText, jobDescription, targetRole, 
 
   const overlapPct = targetTerms.length > 0 
     ? Math.round((matchedKeywords.length / targetTerms.length) * 100)
-    : 80;
+    : 85;
 
   let foundSections = 0;
   STANDARD_SECTIONS.forEach((sec) => {
@@ -145,8 +151,9 @@ export function auditResumeAgainstJob({ resumeText, jobDescription, targetRole, 
   const verbScore = Math.min(100, Math.round((foundVerbs.length / 4) * 100));
 
   const numbersFound = (resume.match(/\b\d+(\.\d+)?%?\b/g) || []).length;
-  const quantScore = numbersFound >= 8 ? 100 : numbersFound >= 4 ? 75 : 45;
+  const quantScore = numbersFound >= 6 ? 100 : numbersFound >= 3 ? 80 : 50;
 
+  // Blended ATS Score
   let overallScore = Math.round(
     0.45 * overlapPct +
     0.25 * vectorScore +
@@ -158,7 +165,7 @@ export function auditResumeAgainstJob({ resumeText, jobDescription, targetRole, 
   if (resume.length > 50 && jd.length > 50 && (resume.includes(jd.slice(0, 50)) || jd.includes(resume.slice(0, 50)))) {
     overallScore = 98;
   }
-  overallScore = Math.min(100, Math.max(15, overallScore));
+  overallScore = Math.min(100, Math.max(20, overallScore));
 
   const deltaRecommendations = [];
   const metrics = candidateUser?.latestScore;
@@ -213,7 +220,7 @@ export function auditResumeAgainstJob({ resumeText, jobDescription, targetRole, 
   const potentialScore = Math.min(100, overallScore + totalLift);
 
   return {
-    roleTitle: (targetRole && ROLE_PRESETS[targetRole]?.title) || 'Custom Specification',
+    roleTitle: targetRole || 'Custom Specification',
     currentAtsScore: overallScore,
     potentialScore,
     totalLift,

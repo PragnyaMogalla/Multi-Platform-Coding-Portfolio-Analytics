@@ -7,7 +7,11 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import multer from 'multer';
 import PDFParser from 'pdf2json';
+import 'dotenv/config';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, TabStopType } from 'docx';
 import { auditResumeAgainstJob, ROLE_PRESETS } from './atsScorer.js';
+import 'dotenv/config'; // Loads your .env file
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 5050;
@@ -55,7 +59,7 @@ function saveDB(data) {
 }
 
 /* ============================================================================
-   TAXONOMY & DYNAMIC NORMALIZATION ENGINE
+   TAXONOMY & NORMALIZATION ENGINE
    ========================================================================== */
 const TOPIC_TAXONOMY = {
   'Arrays & Strings': ['array', 'arrays', 'string', 'strings', 'two-pointer', 'two pointers', 'sliding window', 'implementation'],
@@ -142,8 +146,6 @@ const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 /* ============================================================================
    PLATFORM SCRAPERS & SCORERS
    ========================================================================== */
-
-// 1. CODEFORCES
 async function fetchCodeforces(username) {
   const base = 'https://codeforces.com/api';
   const out = { platform: 'codeforces', available: false, username };
@@ -155,7 +157,6 @@ async function fetchCodeforces(username) {
     ]);
     const info = infoRes.data.result[0];
     const contests = ratingRes.data.result || [];
-
     const solvedSet = new Set();
     const languageCounts = {};
     const topicCounts = {};
@@ -186,10 +187,7 @@ async function fetchCodeforces(username) {
     }
 
     const now = Date.now();
-    const activeMonthsLast12 = [...activeMonths].filter((m) => {
-      const diffDays = (now - new Date(m + '-01').getTime()) / 86400000;
-      return diffDays <= 365;
-    }).length;
+    const activeMonthsLast12 = [...activeMonths].filter((m) => (now - new Date(m + '-01').getTime()) / 86400000 <= 365).length;
 
     out.available = true;
     out.rating = info?.rating ?? null;
@@ -226,7 +224,6 @@ function scoreCodeforces(d) {
   ]);
 }
 
-// 2. LEETCODE
 async function fetchLeetCode(username) {
   const out = { platform: 'leetcode', available: false, username };
   const query = `query userProfile($username: String!) {
@@ -273,7 +270,7 @@ async function fetchLeetCode(username) {
       const cal = JSON.parse(user.submissionCalendar || '{}');
       const now = Date.now() / 1000;
       activeDays = Object.entries(cal).filter(([ts]) => now - Number(ts) <= 365 * 86400).length;
-    } catch { /* optional */ }
+    } catch {}
 
     out.available = true;
     out.rating = contest?.rating ? Math.round(contest.rating) : null;
@@ -294,49 +291,13 @@ async function fetchLeetCode(username) {
 function scoreLeetCode(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
-    {
-      key: 'problemsAndDifficulty',
-      label: 'Problem Solving & Difficulty (50 Pts)',
-      max: 50,
-      compute: () => (d.weightedSolving != null ? Math.min(50, (d.weightedSolving / 700) * 50) : null)
-    },
-    {
-      key: 'contest',
-      label: 'Contest Metrics (20 Pts)',
-      max: 20,
-      compute: () => {
-        if (d.rating == null && d.contestsAttended == null) return null;
-        const rScore = d.rating != null ? Math.min(15, (d.rating / 1600) * 15) : 0;
-        const pScore = d.contestsAttended != null ? Math.min(5, (d.contestsAttended / 50) * 5) : 0;
-        return rScore + pScore;
-      }
-    },
-    {
-      key: 'diversity',
-      label: 'Topic & Language Diversity (10 Pts)',
-      max: 10,
-      compute: () => {
-        const topicsCount = Object.keys(d.topicCounts || {}).length;
-        const langsCount = Object.keys(d.languageCounts || {}).length;
-        return Math.min(6, (topicsCount / 15) * 6) + Math.min(4, (langsCount / 4) * 4);
-      }
-    },
-    {
-      key: 'badgesAndConsistency',
-      label: 'Badges & Consistency (10 Pts)',
-      max: 10,
-      compute: () => {
-        if (d.badgesCount == null && d.activeDaysLast12Months == null) return null;
-        const badgePts = Math.min(4, (d.badgesCount || 0) * 1);
-        const streakPts = Math.min(3, ((d.activeDaysLast12Months || 0) / 60) * 3);
-        const activityPts = (d.activeDaysLast12Months || 0) > 10 ? 3 : 1;
-        return badgePts + streakPts + activityPts;
-      }
-    }
+    { key: 'problemsAndDifficulty', label: 'Problem Solving (50 Pts)', max: 50, compute: () => (d.weightedSolving != null ? Math.min(50, (d.weightedSolving / 700) * 50) : null) },
+    { key: 'contest', label: 'Contest Metrics (20 Pts)', max: 20, compute: () => ((d.rating != null ? Math.min(15, (d.rating / 1600) * 15) : 0) + (d.contestsAttended != null ? Math.min(5, (d.contestsAttended / 50) * 5) : 0)) },
+    { key: 'diversity', label: 'Diversity (10 Pts)', max: 10, compute: () => Math.min(6, (Object.keys(d.topicCounts || {}).length / 15) * 6) + Math.min(4, (Object.keys(d.languageCounts || {}).length / 4) * 4) },
+    { key: 'badgesAndConsistency', label: 'Badges & Consistency (10 Pts)', max: 10, compute: () => Math.min(4, (d.badgesCount || 0)) + Math.min(3, ((d.activeDaysLast12Months || 0) / 60) * 3) + ((d.activeDaysLast12Months || 0) > 10 ? 3 : 1) }
   ]);
 }
 
-// 3. CODECHEF
 async function fetchCodeChef(username) {
   const out = { platform: 'codechef', available: false, username };
   try {
@@ -359,16 +320,12 @@ async function fetchCodeChef(username) {
       else if (/very hard|challenge/.test(label)) veryHard += count;
       else medium += count;
     });
-    const problemsSolved = easy + medium + hard + veryHard;
-    const weightedSolved = easy * 1 + medium * 2 + hard * 3 + veryHard * 4;
-    const contestsCount = parseInt($('.contest-participated-count b').first().text().trim(), 10) || null;
-
-    out.available = rating !== null || problemsSolved > 0;
+    out.available = rating !== null || (easy + medium + hard + veryHard) > 0;
     out.rating = rating;
     out.stars = stars;
-    out.problemsSolved = problemsSolved || null;
-    out.weightedSolved = problemsSolved ? weightedSolved : null;
-    out.contestsCount = contestsCount;
+    out.problemsSolved = easy + medium + hard + veryHard;
+    out.weightedSolved = easy * 1 + medium * 2 + hard * 3 + veryHard * 4;
+    out.contestsCount = parseInt($('.contest-participated-count b').first().text().trim(), 10) || null;
     out.graphBuckets = { easy, medium, hard: hard + veryHard };
     out.topicCounts = {};
     out.languageCounts = {};
@@ -381,22 +338,14 @@ async function fetchCodeChef(username) {
 function scoreCodeChef(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
-    {
-      key: 'rating', label: 'Current Rating / Stars (35 Pts)', max: 35,
-      compute: () => {
-        if (d.rating != null) return Math.min(35, (d.rating / 2000) * 35);
-        if (d.stars != null) return (d.stars / 7) * 35;
-        return null;
-      }
-    },
-    { key: 'problems', label: 'Problems Solved (Weighted, 30 Pts)', max: 30, compute: () => (d.weightedSolved != null ? Math.min(30, (d.weightedSolved / 300) * 30) : null) },
-    { key: 'contest', label: 'Contest Performance (20 Pts)', max: 20, compute: () => (d.contestsCount != null ? Math.min(20, (d.contestsCount / 25) * 20) : null) },
-    { key: 'difficulty', label: 'Difficulty Beyond Beginner (10 Pts)', max: 10, compute: () => (d.graphBuckets?.hard > 0 ? 10 : d.graphBuckets?.medium > 5 ? 7 : 4) },
-    { key: 'consistency', label: 'Badges & Consistency (5 Pts)', max: 5, compute: () => (d.contestsCount > 5 ? 5 : 2) }
+    { key: 'rating', label: 'Rating (35 Pts)', max: 35, compute: () => (d.rating != null ? Math.min(35, (d.rating / 2000) * 35) : d.stars != null ? (d.stars / 7) * 35 : null) },
+    { key: 'problems', label: 'Problems Solved (30 Pts)', max: 30, compute: () => (d.weightedSolved != null ? Math.min(30, (d.weightedSolved / 300) * 30) : null) },
+    { key: 'contest', label: 'Contests (20 Pts)', max: 20, compute: () => (d.contestsCount != null ? Math.min(20, (d.contestsCount / 25) * 20) : null) },
+    { key: 'difficulty', label: 'Difficulty (10 Pts)', max: 10, compute: () => (d.graphBuckets?.hard > 0 ? 10 : d.graphBuckets?.medium > 5 ? 7 : 4) },
+    { key: 'consistency', label: 'Consistency (5 Pts)', max: 5, compute: () => (d.contestsCount > 5 ? 5 : 2) }
   ]);
 }
 
-// 4. HACKERRANK
 const HR_CATEGORY_MAP = [
   { key: 'problemSolving', max: 15, test: /problem solving|algorithms|data structures/i },
   { key: 'programmingLanguages', max: 10, test: /python|java|c\+\+|c\b|javascript|ruby|go\b|sql/i },
@@ -446,32 +395,12 @@ async function fetchHackerRank(username) {
 function scoreHackerRank(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
-    {
-      key: 'badges', label: 'Skill Badges (35 Pts)', max: 35,
-      compute: () => {
-        if (!d.badgeCategoryStars) return null;
-        const c = d.badgeCategoryStars;
-        return (c.problemSolving / 6) * 15 +
-               (c.programmingLanguages / 6) * 10 +
-               (c.specializedSkills / 6) * 5 +
-               (c.tutorials / 6) * 5;
-      }
-    },
-    {
-      key: 'medals', label: 'Contest Medals (25 Pts)', max: 25,
-      compute: () => {
-        if (!d.medals) return 0;
-        return Math.min(25, (d.medals.gold || 0) * 5 + (d.medals.silver || 0) * 3 + (d.medals.bronze || 0) * 1);
-      }
-    },
-    {
-      key: 'problems', label: 'Challenge Solves (40 Pts)', max: 40,
-      compute: () => (d.problemsSolved != null ? Math.min(40, (d.problemsSolved / 100) * 40) : null)
-    }
+    { key: 'badges', label: 'Skill Badges (35 Pts)', max: 35, compute: () => (d.badgeCategoryStars ? (d.badgeCategoryStars.problemSolving / 6) * 15 + (d.badgeCategoryStars.programmingLanguages / 6) * 10 + (d.badgeCategoryStars.specializedSkills / 6) * 5 + (d.badgeCategoryStars.tutorials / 6) * 5 : null) },
+    { key: 'medals', label: 'Medals (25 Pts)', max: 25, compute: () => Math.min(25, (d.medals?.gold || 0) * 5 + (d.medals?.silver || 0) * 3 + (d.medals?.bronze || 0) * 1) },
+    { key: 'problems', label: 'Verified Solves (40 Pts)', max: 40, compute: () => (d.problemsSolved != null ? Math.min(40, (d.problemsSolved / 100) * 40) : null) }
   ]);
 }
 
-// 5. GITHUB
 async function fetchGitHub(username) {
   const out = { platform: 'github', available: false, username };
   try {
@@ -479,47 +408,28 @@ async function fetchGitHub(username) {
       axios.get(`https://api.github.com/users/${username}`, { headers: UA }),
       axios.get(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: UA }).catch(() => ({ data: [] }))
     ]);
-
     const profile = userRes.data;
     const repos = Array.isArray(reposRes.data) ? reposRes.data : [];
 
-    let totalStars = 0;
-    let totalForks = 0;
-    let collaborations = 0;
+    let totalStars = 0, collaborations = 0, reposInLastYear = 0, reposInLast6Months = 0;
     const languageCounts = {};
-    const monthsActiveSet = new Set();
     const oneYearAgo = Date.now() - 365 * 86400000;
     const sixMonthsAgo = Date.now() - 180 * 86400000;
-    let reposInLastYear = 0;
-    let reposInLast6Months = 0;
 
     for (const r of repos) {
-      if (r.fork) {
-        collaborations++;
-        continue;
-      }
+      if (r.fork) { collaborations++; continue; }
       totalStars += r.stargazers_count || 0;
-      totalForks += r.forks_count || 0;
-      if (r.language) {
-        languageCounts[r.language] = (languageCounts[r.language] || 0) + 1;
-      }
+      if (r.language) languageCounts[r.language] = (languageCounts[r.language] || 0) + 1;
       const updatedTime = new Date(r.updated_at).getTime();
       if (updatedTime >= oneYearAgo) reposInLastYear++;
-      if (updatedTime >= sixMonthsAgo) {
-        reposInLast6Months++;
-        monthsActiveSet.add(r.updated_at.slice(0, 7));
-      }
+      if (updatedTime >= sixMonthsAgo) reposInLast6Months++;
     }
 
     out.available = true;
     out.publicRepos = profile.public_repos || 0;
-    out.followers = profile.followers || 0;
-    out.following = profile.following || 0;
     out.totalStars = totalStars;
-    out.totalForks = totalForks;
     out.collaborations = collaborations;
     out.reposInLastYear = Math.max(reposInLastYear, profile.public_repos || 0);
-    out.monthsActiveInLast6 = monthsActiveSet.size;
     out.reposInLast6Months = reposInLast6Months;
     out.languagesUsed = Object.keys(languageCounts).length;
     out.languageCounts = languageCounts;
@@ -535,10 +445,12 @@ async function fetchGitHub(username) {
 function scoreGitHub(d) {
   if (!d.available) return { score: null, breakdown: [] };
   return scoreComponents([
-    { key: 'repos', label: 'Repository Volume (25 Pts)', max: 25, compute: () => (d.publicRepos != null ? Math.min(25, (d.publicRepos / 15) * 25) : null) },
-    { key: 'stars', label: 'Stargazers & Code Impact (30 Pts)', max: 30, compute: () => (d.totalStars != null ? Math.min(30, (d.totalStars / 10) * 30) : null) },
-    { key: 'diversity', label: 'Language Diversity (25 Pts)', max: 25, compute: () => (d.languagesUsed != null ? Math.min(25, (d.languagesUsed / 5) * 25) : null) },
-    { key: 'community', label: 'Followers & Reach (20 Pts)', max: 20, compute: () => (d.followers != null ? Math.min(20, (d.followers / 20) * 20) : null) }
+    { key: 'repos', label: 'Repositories (25 Pts)', max: 25, compute: () => (d.publicRepos != null ? Math.min(25, (d.publicRepos / 15) * 25) : null) },
+    { key: 'stars', label: 'Stargazers (30 Pts)', max: 30, compute: () => (d.totalStars != null ? Math.min(30, (d.totalStars / 10) * 30) : null) },
+    { key: 'diversity', label: 'Languages (25 Pts)', max: 25, compute: () => (d.languagesUsed != null ? Math.min(25, (d.languagesUsed / 5) * 25) : null) },
+    {key: 'community',label: 'Followers & Reach (20 Pts)',max: 20,  compute: () => (d.followers != null ? Math.min(20, (d.followers / 20) * 20) : null)
+}
+
   ]);
 }
 
@@ -585,9 +497,7 @@ function calculateRbuPlacementScore(user, platforms) {
   const sBadges = fallbackBadges >= 5 ? 5 : fallbackBadges === 4 ? 4 : fallbackBadges === 3 ? 3 : fallbackBadges === 2 ? 2 : fallbackBadges >= 1 ? 1 : 0;
 
   let totalMedHard = 0;
-  if (hr.available && hr.problemsSolved) {
-    totalMedHard += (hr.badgeCategoryStars?.problemSolving >= 3 ? Math.round(hr.problemsSolved * 0.4) : 0);
-  }
+  if (hr.available && hr.problemsSolved) totalMedHard += (hr.badgeCategoryStars?.problemSolving >= 3 ? Math.round(hr.problemsSolved * 0.4) : 0);
   if (lc.available && lc.graphBuckets) totalMedHard += (lc.graphBuckets.medium || 0) + (lc.graphBuckets.hard || 0);
   if (cf.available && cf.graphBuckets) totalMedHard += (cf.graphBuckets.medium || 0) + (cf.graphBuckets.hard || 0);
   if (cc.available && cc.graphBuckets) totalMedHard += (cc.graphBuckets.medium || 0) + (cc.graphBuckets.hard || 0);
@@ -784,8 +694,6 @@ async function normalizeCandidate(profiles) {
 
 /* ============================================================================
    RANKING ENGINE
-   - GLOBAL RANK: STRICTLY CP SIGNAL OVERALL SCORE
-   - COMMUNITY RANK: STRICTLY RBU PLACEMENT TOTAL SCORE
    ========================================================================== */
 function getCpScore(candidate) {
   return Number(candidate.latestScore?.overallScore) || 0;
@@ -798,12 +706,12 @@ function getRbuScore(candidate) {
 function calculateRankings(db) {
   const allCandidates = db.users.filter((u) => u.role === 'candidate');
 
-  // 1. GLOBAL RANKING (Sorted Strictly by CP Score Descending)
+  // 1. GLOBAL RANKING (Sorted strictly by CP Score descending)
   const globalSorted = [...allCandidates].sort((a, b) => getCpScore(b) - getCpScore(a));
   const globalRankMap = new Map();
   globalSorted.forEach((c, idx) => globalRankMap.set(c.username.toLowerCase(), idx + 1));
 
-  // 2. COMMUNITY RANKINGS (Sorted Strictly by RBU Score Descending per Community)
+  // 2. COMMUNITY RANKINGS (Sorted strictly by RBU Placement Score descending)
   const communityRankMap = new Map();
   const communities = db.users.filter((u) => u.role === 'community');
 
@@ -833,9 +741,8 @@ function attachRankingMetadata(user, db) {
   const username = user.username.toLowerCase();
 
   const currentGlobalRank = globalRankMap.get(username) || globalTotal;
-
-  // Build full array of all communities this student is a member of
   const allCommunityRanks = [];
+
   (user.communities || []).forEach((code) => {
     const key = `${code.toUpperCase()}__${username}`;
     const rankInfo = communityRankMap.get(key);
@@ -885,7 +792,7 @@ app.use(express.json());
 
 const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 
-// 1. Sign Up
+// Auth Routes
 app.post('/api/auth/signup', async (req, res) => {
   const { name, email, username, password, role, links, academics, institutionalExperience } = req.body;
   if (!name || !email || !username || !password) {
@@ -957,7 +864,6 @@ app.post('/api/auth/signup', async (req, res) => {
   res.json({ message: 'Account created successfully', user: safeUser });
 });
 
-// 2. Login
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
   const db = loadDB();
@@ -972,7 +878,6 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ user: safeUser });
 });
 
-// 3. User Refresh
 app.get('/api/user/:username', async (req, res) => {
   const db = loadDB();
   const user = db.users.find((u) => u.username.toLowerCase() === req.params.username.toLowerCase());
@@ -986,7 +891,6 @@ app.get('/api/user/:username', async (req, res) => {
   res.json({ user: safeUser });
 });
 
-// 4. Force Live Re-sync
 app.post('/api/user/recalculate', async (req, res) => {
   const { username } = req.body;
   const db = loadDB();
@@ -998,7 +902,6 @@ app.post('/api/user/recalculate', async (req, res) => {
   res.json({ message: 'Live scoring matrix recalculated!', user: safeUser });
 });
 
-// 5. Update Credentials
 app.post('/api/user/update-placement-credentials', async (req, res) => {
   const { username, academics, institutionalExperience } = req.body;
   const db = loadDB();
@@ -1013,11 +916,13 @@ app.post('/api/user/update-placement-credentials', async (req, res) => {
   res.json({ message: 'Credentials updated and re-evaluated live!', user: safeUser });
 });
 
-// 6. ML Simulation: Dual-Predictive Model
+// Personalized ML Rank Simulation Engine
 app.post('/api/user/simulate-rank-increase', (req, res) => {
   const { username } = req.body;
   const db = loadDB();
-  const targetUser = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase() && u.role === 'candidate');
+  const targetUser = db.users.find(
+    (u) => u.username.toLowerCase() === (username || '').toLowerCase() && u.role === 'candidate'
+  );
   if (!targetUser) return res.status(404).json({ error: 'Candidate not found.' });
 
   attachRankingMetadata(targetUser, db);
@@ -1031,54 +936,124 @@ app.post('/api/user/simulate-rank-increase', (req, res) => {
     ? allCandidates.filter((c) => (c.communities || []).includes(targetUser.rankings.primaryCommunity))
     : allCandidates;
 
-  const strategies = [
-    {
-      id: 'solve_dsa_medium',
+  const userPlatforms = targetUser.links || {};
+  const summaries = targetUser.latestScore?.platformSummaries || [];
+  const rbuBreakdown = targetUser.latestScore?.rbuPlacement?.breakdown || {};
+  const exp = targetUser.institutionalExperience || {};
+
+  // Build Personalized Recommendation Vectors based on ACTUAL candidate data
+  const personalizedStrategies = [];
+
+  // 1. LeetCode / Coding Platform DSA Headroom
+  const lcSummary = summaries.find((p) => p.platform === 'leetcode');
+  const hasCodingPlatform = userPlatforms.leetcode || userPlatforms.codeforces || userPlatforms.codechef;
+  if (hasCodingPlatform) {
+    const currentMedHard = rbuBreakdown.codingPlatforms?.mediumHard || 0;
+    const canGainMedHard = currentMedHard < 5;
+    const lift = canGainMedHard ? 6.5 : 3.0;
+
+    personalizedStrategies.push({
+      id: 'dsa_medium_headroom',
       title: 'Solve 10 Medium / Hard DSA Problems',
-      description: 'Practice 10 Medium/Hard problems on LeetCode/Codeforces',
-      scoreLift: 5.0
-    },
-    {
-      id: 'publish_repos',
-      title: 'Push 3 Active Projects to GitHub',
-      description: 'Commit regularly and maintain bi-weekly contribution consistency',
-      scoreLift: 4.0
-    },
-    {
-      id: 'global_cert',
-      title: 'Clear 1 Global Cloud/Security Certification',
-      description: 'AWS / Azure / GCP / CISCO industry certification (+5 M)',
-      scoreLift: 5.0
-    },
-    {
-      id: 'industry_project',
-      title: 'Complete 1 Industry Problem / SIH Project',
-      description: 'Document an industry-mentored or hackathon problem statement (+5 M)',
-      scoreLift: 5.0
-    },
-    {
-      id: 'hackathon_podium',
-      title: 'Win or Place in an Inter-College Hackathon',
-      description: 'Earn 1st or 2nd prize in an accredited hackathon (+4 to +5 M)',
-      scoreLift: 4.0
+      description: `Targeting dynamic programming and tree algorithms on ${userPlatforms.leetcode ? 'LeetCode' : 'Codeforces'}`,
+      cpLift: 5.5,
+      rbuLift: canGainMedHard ? 4.0 : 2.0,
+      focusPlatform: userPlatforms.leetcode ? 'LeetCode' : 'Codeforces'
+    });
+  } else {
+    // If user hasn't linked LeetCode/Codeforces, suggest linking it first
+    personalizedStrategies.push({
+      id: 'connect_leetcode',
+      title: 'Link LeetCode or Codeforces Profile',
+      description: 'Your CP Signal denominator is missing primary problem solving weight (+2.0x multiplier)',
+      cpLift: 15.0,
+      rbuLift: 8.0,
+      focusPlatform: 'LeetCode'
+    });
+  }
+
+  // 2. GitHub Software Engineering Velocity
+  const ghSummary = summaries.find((p) => p.platform === 'github');
+  if (userPlatforms.github) {
+    const currentContribScore = rbuBreakdown.github?.contributions || 0;
+    const currentFreq = rbuBreakdown.github?.frequency || 0;
+    const ghHeadroom = (5 - currentContribScore) + (4 - currentFreq);
+
+    if (ghHeadroom > 0) {
+      personalizedStrategies.push({
+        id: 'github_active_commits',
+        title: 'Push 2 New Repositories & Maintain Bi-Weekly Activity',
+        description: `Your GitHub velocity score is currently at ${rbuBreakdown.github?.total || 0}/15 M. Increasing commit frequency yields immediate points.`,
+        cpLift: 3.5,
+        rbuLift: Math.min(6.0, ghHeadroom * 1.5),
+        focusPlatform: 'GitHub'
+      });
     }
-  ];
+  } else {
+    personalizedStrategies.push({
+      id: 'connect_github',
+      title: 'Link Verified GitHub Profile',
+      description: 'Unlock 15 Marks on the RBU Placement Sheet and a 2.0x multiplier on CP Signal',
+      cpLift: 12.0,
+      rbuLift: 10.0,
+      focusPlatform: 'GitHub'
+    });
+  }
 
-  const recommendations = strategies.map((strat) => {
-    const simulatedCp = Math.min(100, baseCp + strat.scoreLift);
-    const simulatedRbu = Math.min(100, baseRbu + strat.scoreLift);
+  // 3. RBU Institutional Certifications Headroom
+  const certTotal = rbuBreakdown.certifications?.total || 0;
+  if (certTotal < 15) {
+    const needed = 15 - certTotal;
+    personalizedStrategies.push({
+      id: 'clear_global_cert',
+      title: 'Complete 1 Global Cloud/Security Certification',
+      description: `Current Certifications: ${certTotal}/15 M. Adding an AWS/Azure/GCP credential grants +5 Marks directly to RBU ranking.`,
+      cpLift: 0.0,
+      rbuLift: Math.min(5.0, needed),
+      focusPlatform: 'Institutional'
+    });
+  }
 
-    // Predict Global Rank (strictly via CP score)
-    const newGlobalRank = allCandidates.filter((c) => {
-      if (c.username.toLowerCase() === targetUser.username.toLowerCase()) return false;
-      return getCpScore(c) > simulatedCp;
-    }).length + 1;
+  // 4. SIH / Industry Problem Statement Projects
+  const projTotal = rbuBreakdown.projects?.total || 0;
+  if (projTotal < 15) {
+    personalizedStrategies.push({
+      id: 'complete_industry_project',
+      title: 'Document 1 SIH / Industry Mentored Problem Statement',
+      description: `Current Project Mark: ${projTotal}/15 M. An industry-aligned solution adds up to +5 Marks to your placement score.`,
+      cpLift: 2.0,
+      rbuLift: 5.0,
+      focusPlatform: 'Institutional'
+    });
+  }
 
-    // Predict Community Rank (strictly via RBU score)
-    const newCommRank = communityMembers.filter((c) => {
-      if (c.username.toLowerCase() === targetUser.username.toLowerCase()) return false;
-      return getRbuScore(c) > simulatedRbu;
-    }).length + 1;
+  // 5. Hackathon Podium Placements
+  const hackTotal = rbuBreakdown.hackathons?.total || 0;
+  if (hackTotal < 10) {
+    personalizedStrategies.push({
+      id: 'hackathon_podium',
+      title: 'Win or Place in an Accredited Hackathon',
+      description: `Current Hackathon Points: ${hackTotal}/10 M. Securing a 1st or 2nd prize adds +4 to +5 Marks.`,
+      cpLift: 3.0,
+      rbuLift: Math.min(5.0, 10 - hackTotal),
+      focusPlatform: 'Competitions'
+    });
+  }
+
+  // Calculate Relative Cohort Rank Deltas based on the candidate's personal lifts
+  const recommendations = personalizedStrategies.map((strat) => {
+    const simulatedCp = Math.min(100, baseCp + strat.cpLift);
+    const simulatedRbu = Math.min(100, baseRbu + strat.rbuLift);
+
+    // Global Rank: Evaluated strictly by simulated CP Score
+    const newGlobalRank = allCandidates.filter(
+      (c) => c.username.toLowerCase() !== targetUser.username.toLowerCase() && getCpScore(c) > simulatedCp
+    ).length + 1;
+
+    // Community Rank: Evaluated strictly by simulated RBU Placement Score
+    const newCommRank = communityMembers.filter(
+      (c) => c.username.toLowerCase() !== targetUser.username.toLowerCase() && getRbuScore(c) > simulatedRbu
+    ).length + 1;
 
     const globalDelta = Math.max(0, currentGlobalRank - newGlobalRank);
     const commDelta = Math.max(0, currentCommRank - newCommRank);
@@ -1093,64 +1068,20 @@ app.post('/api/user/simulate-rank-increase', (req, res) => {
     };
   });
 
+  // Sort by highest combined impact on candidate's ranks
+  recommendations.sort(
+    (a, b) => (b.communityRankIncrease + b.globalRankIncrease) - (a.communityRankIncrease + a.globalRankIncrease)
+  );
+
   res.json({
     currentGlobalRank,
     currentCommunityRank: currentCommRank,
     baseCp,
     baseRbu,
-    recommendations: recommendations.sort((a, b) => (b.communityRankIncrease + b.globalRankIncrease) - (a.communityRankIncrease + a.globalRankIncrease))
+    recommendations
   });
 });
 
-// 7. ATS Engine Roles & Multipart Audit
-app.get('/api/ats/roles', (req, res) => {
-  const roles = Object.entries(ROLE_PRESETS).map(([id, r]) => ({
-    id,
-    title: r.title,
-    keywordsCount: r.keywords.length
-  }));
-  res.json({ roles });
-});
-
-app.post('/api/ats/audit', upload.single('resumeFile'), async (req, res) => {
-  try {
-    let { resumeText, jobDescription, targetRole, username } = req.body;
-
-    if (req.file) {
-      if (req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf')) {
-        resumeText = await new Promise((resolve, reject) => {
-          const pdfParser = new PDFParser(null, 1);
-          pdfParser.on('pdfParser_dataError', (errData) => reject(errData.parserError));
-          pdfParser.on('pdfParser_dataReady', () => resolve(pdfParser.getRawTextContent()));
-          pdfParser.parseBuffer(req.file.buffer);
-        });
-      } else {
-        resumeText = req.file.buffer.toString('utf-8');
-      }
-    }
-
-    if (!resumeText || !resumeText.trim()) {
-      return res.status(400).json({ error: 'Please upload a resume file (.pdf, .txt) or paste your resume text.' });
-    }
-
-    const db = loadDB();
-    const candidateUser = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase());
-
-    const result = auditResumeAgainstJob({
-      resumeText,
-      jobDescription,
-      targetRole,
-      candidateUser
-    });
-
-    res.json({ ...result, extractedResumeText: resumeText });
-  } catch (err) {
-    console.error('ATS Audit Error:', err);
-    res.status(500).json({ error: 'Failed to process resume file: ' + err.message });
-  }
-});
-
-// 8. Add & Lock Platform Link
 app.post('/api/user/add-link', async (req, res) => {
   const { username, platform, link } = req.body;
   const db = loadDB();
@@ -1171,9 +1102,36 @@ app.post('/api/user/add-link', async (req, res) => {
   res.json({ message: `Successfully added and permanently locked ${platform}.`, user: safeUser });
 });
 
-// 9. Community Workflows (Mutual Joining)
+app.post('/api/user/delete-account', (req, res) => {
+  const { username, password } = req.body;
+  const db = loadDB();
+  const userIdx = db.users.findIndex((u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password);
+  if (userIdx === -1) return res.status(401).json({ error: 'Invalid password. Cannot delete account.' });
 
-// A. Student Requests to Join Community via Code
+  const user = db.users[userIdx];
+  if (user.role === 'candidate') {
+    db.users.forEach((u) => {
+      if (u.role === 'community') {
+        u.members = (u.members || []).filter((m) => m.toLowerCase() !== user.username.toLowerCase());
+        u.pendingRequests = (u.pendingRequests || []).filter((r) => r.toLowerCase() !== user.username.toLowerCase());
+      }
+    });
+  } else if (user.role === 'community') {
+    const code = user.communityCode;
+    db.users.forEach((u) => {
+      if (u.role === 'candidate') {
+        u.communities = (u.communities || []).filter((c) => c !== code);
+        u.incomingInvites = (u.incomingInvites || []).filter((inv) => inv.code !== code);
+      }
+    });
+  }
+
+  db.users.splice(userIdx, 1);
+  saveDB(db);
+  res.json({ message: 'Account permanently deleted.' });
+});
+
+// Community Routes
 app.post('/api/community/student-request', (req, res) => {
   const { studentUsername, communityCode } = req.body;
   const db = loadDB();
@@ -1193,7 +1151,6 @@ app.post('/api/community/student-request', (req, res) => {
   res.json({ message: `Request successfully sent to ${lead.name} (${codeClean})!` });
 });
 
-// B. Lead Responds to Student Request
 app.post('/api/community/admin-respond-request', (req, res) => {
   const { adminUsername, studentUsername, action } = req.body;
   const db = loadDB();
@@ -1211,7 +1168,6 @@ app.post('/api/community/admin-respond-request', (req, res) => {
   res.json({ message: `Request ${action === 'accept' ? 'accepted' : 'declined'}.` });
 });
 
-// C. Lead Invites Student by Unique Username Handle
 app.post('/api/community/admin-invite-student', (req, res) => {
   const { adminUsername, studentUsername } = req.body;
   const db = loadDB();
@@ -1241,7 +1197,6 @@ app.post('/api/community/admin-invite-student', (req, res) => {
   res.json({ message: `Invitation successfully dispatched to @${student.username}!` });
 });
 
-// D. Student Responds to Lead Invitation
 app.post('/api/community/student-respond-invite', (req, res) => {
   const { studentUsername, communityCode, action } = req.body;
   const db = loadDB();
@@ -1262,7 +1217,6 @@ app.post('/api/community/student-respond-invite', (req, res) => {
   res.json({ message: `Invitation ${action === 'accept' ? 'accepted' : 'declined'}.`, user: safeUser });
 });
 
-// 10. Admin Cohort Leaderboard (Strictly Sorted by RBU Score)
 app.get('/api/admin/cohort/:adminUsername', async (req, res) => {
   const db = loadDB();
   const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
@@ -1272,19 +1226,14 @@ app.get('/api/admin/cohort/:adminUsername', async (req, res) => {
   await Promise.all(verifiedCohort.map((c) => refreshCandidateLive(c, db)));
 
   verifiedCohort.forEach((c) => attachRankingMetadata(c, db));
-  
-  // Sorted strictly by RBU score descending for the Community Leaderboard
   verifiedCohort.sort((a, b) => getRbuScore(b) - getRbuScore(a));
 
   const cleanCohort = verifiedCohort.map(({ password: _, ...rest }) => rest);
-  const pendingRequests = db.users
-    .filter((u) => (lead.pendingRequests || []).includes(u.username))
-    .map((u) => ({ name: u.name, username: u.username, email: u.email }));
+  const pendingRequests = db.users.filter((u) => (lead.pendingRequests || []).includes(u.username)).map((u) => ({ name: u.name, username: u.username, email: u.email }));
 
   res.json({ communityCode: lead.communityCode, cohort: cleanCohort, pendingRequests });
 });
 
-// 11. Admin Export CSV
 app.get('/api/admin/export-csv/:adminUsername', async (req, res) => {
   const db = loadDB();
   const lead = db.users.find((u) => u.username.toLowerCase() === req.params.adminUsername.toLowerCase());
@@ -1295,79 +1244,464 @@ app.get('/api/admin/export-csv/:adminUsername', async (req, res) => {
   candidates.forEach((c) => attachRankingMetadata(c, db));
   candidates.sort((a, b) => getRbuScore(b) - getRbuScore(a));
 
-  const headers = [
-    'Community RBU Rank',
-    'Global CP Rank',
-    'Username',
-    'Name',
-    'Email',
-    'RBU Placement Score',
-    'CP Signal Index',
-    '10th %',
-    '12th %',
-    'CGPA',
-    'LeetCode Solves',
-    'GitHub Repos',
-    'Last Synced'
-  ];
-
+  const headers = ['Community RBU Rank', 'Global CP Rank', 'Username', 'Name', 'Email', 'RBU Placement Score', 'CP Signal Index', '10th %', '12th %', 'CGPA', 'LeetCode Solves', 'GitHub Repos', 'Last Synced'];
   const rows = candidates.map((c, idx) => {
     const lcSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'leetcode');
     const ghSummary = c.latestScore?.platformSummaries?.find((p) => p.platform === 'github');
-
     return [
-      `"#${idx + 1}"`,
-      `"#${c.rankings?.globalRank || 'N/A'}"`,
-      `"${c.username}"`,
-      `"${c.name}"`,
-      `"${c.email}"`,
-      c.latestScore?.rbuPlacement?.totalScore ?? 'N/A',
-      c.latestScore?.overallScore ?? 'N/A',
-      c.academics?.tenthPercentage || 'N/A',
-      c.academics?.twelfthPercentage || 'N/A',
-      c.academics?.cgpa || 'N/A',
-      lcSummary?.problemsSolved ?? 'N/A',
-      ghSummary?.problemsSolved ?? 'N/A',
-      `"${c.latestScore?.lastUpdated || new Date().toISOString()}"`
+      `"#${idx + 1}"`, `"#${c.rankings?.globalRank || 'N/A'}"`, `"${c.username}"`, `"${c.name}"`, `"${c.email}"`,
+      c.latestScore?.rbuPlacement?.totalScore ?? 'N/A', c.latestScore?.overallScore ?? 'N/A',
+      c.academics?.tenthPercentage || 'N/A', c.academics?.twelfthPercentage || 'N/A', c.academics?.cgpa || 'N/A',
+      lcSummary?.problemsSolved ?? 'N/A', ghSummary?.problemsSolved ?? 'N/A', `"${c.latestScore?.lastUpdated || new Date().toISOString()}"`
     ];
   });
 
-  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', `attachment; filename="${lead.communityCode}_cohort_ranks.csv"`);
-  res.send(csvContent);
+  res.send([headers.join(','), ...rows.map((r) => r.join(','))].join('\n'));
 });
 
-// 12. Delete Account
-app.post('/api/user/delete-account', (req, res) => {
-  const { username, password } = req.body;
-  const db = loadDB();
-  const userIdx = db.users.findIndex(
-    (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password
-  );
-  if (userIdx === -1) return res.status(401).json({ error: 'Invalid password. Cannot delete account.' });
+// ATS Audit Endpoint
+app.get('/api/ats/roles', (req, res) => {
+  const roles = Object.entries(ROLE_PRESETS).map(([id, r]) => ({ id, title: r.title, keywordsCount: r.keywords.length }));
+  res.json({ roles });
+});
 
-  const user = db.users[userIdx];
-  if (user.role === 'candidate') {
-    db.users.forEach((u) => {
-      if (u.role === 'community') {
-        u.members = (u.members || []).filter((m) => m.toLowerCase() !== user.username.toLowerCase());
-        u.pendingRequests = (u.pendingRequests || []).filter((r) => r.toLowerCase() !== user.username.toLowerCase());
+app.post('/api/ats/audit', upload.single('resumeFile'), async (req, res) => {
+  try {
+    let { resumeText, jobDescription, targetRole, username } = req.body;
+    if (req.file) {
+      if (req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf')) {
+        resumeText = await new Promise((resolve, reject) => {
+          const pdfParser = new PDFParser(null, 1);
+          pdfParser.on('pdfParser_dataError', (errData) => reject(errData.parserError));
+          pdfParser.on('pdfParser_dataReady', () => resolve(pdfParser.getRawTextContent()));
+          pdfParser.parseBuffer(req.file.buffer);
+        });
+      } else {
+        resumeText = req.file.buffer.toString('utf-8');
       }
-    });
-  } else if (user.role === 'community') {
-    const code = user.communityCode;
-    db.users.forEach((u) => {
-      if (u.role === 'candidate') {
-        u.communities = (u.communities || []).filter((c) => c !== code);
-        u.incomingInvites = (u.incomingInvites || []).filter((inv) => inv.code !== code);
+    }
+
+    if (!resumeText || !resumeText.trim()) {
+      return res.status(400).json({ error: 'Please upload a resume file (.pdf, .txt) or paste your resume text.' });
+    }
+
+    const db = loadDB();
+    const candidateUser = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase());
+    const result = auditResumeAgainstJob({ resumeText, jobDescription, targetRole, candidateUser });
+    res.json({ ...result, extractedResumeText: resumeText });
+  } catch (err) {
+    console.error('ATS Audit Error:', err);
+    res.status(500).json({ error: 'Failed to process resume file: ' + err.message });
+  }
+});
+
+/* ============================================================================
+   ATS RESUME GENERATOR (Gemini & DOCX)
+   ========================================================================== */
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+
+const PROFILE_BASE = {
+  github: 'https://github.com/',
+  linkedin: 'https://www.linkedin.com/in/',
+  leetcode: 'https://leetcode.com/u/',
+  codeforces: 'https://codeforces.com/profile/',
+  codechef: 'https://www.codechef.com/users/',
+  hackerrank: 'https://www.hackerrank.com/profile/'
+};
+const LINK_LABELS = { github: 'GitHub', linkedin: 'LinkedIn', leetcode: 'LeetCode', codeforces: 'Codeforces' };
+
+const arr = (v) => (Array.isArray(v) ? v : []);
+const str = (v) => (typeof v === 'string' ? v.trim() : '');
+const strList = (v) => arr(v).map(str).filter(Boolean);
+
+function buildHeader(user, details) {
+  const links = [];
+  for (const key of ['linkedin', 'github', 'leetcode', 'codeforces']) {
+    const raw = user.links?.[key];
+    if (!raw) continue;
+    let url = raw.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      const uname = key === 'linkedin' ? url.replace(/^\/+|\/+$/g, '') : parseProfileInput(key, url)?.username;
+      url = PROFILE_BASE[key] + uname;
+    }
+    links.push({ label: LINK_LABELS[key], url });
+  }
+  return {
+    name: user.name,
+    email: user.email,
+    phone: String(details.phone || '').trim(),
+    location: String(details.location || '').trim(),
+    links
+  };
+}
+
+function buildCodingFacts(user) {
+  const s = user.latestScore;
+  if (!s) return null;
+  const solved = {};
+  let githubRepos = null;
+  for (const p of s.platformSummaries || []) {
+    if (!p.available || !p.problemsSolved) continue;
+    if (p.platform === 'github') githubRepos = p.problemsSolved;
+    else solved[p.platform] = p.problemsSolved;
+  }
+  return {
+    problemsSolvedByPlatform: solved,
+    githubPublicRepos: githubRepos,
+    difficultySplit: s.difficultyProfile?.totals || null,
+    contestsParticipated: s.contestPerformance?.total || 0,
+    strongTopics: (s.swot?.strengths || []).map((t) => t.topic),
+    topLanguages: (s.languageAnalysis || []).slice(0, 5).map((l) => l.language)
+  };
+}
+
+const RESUME_SYSTEM_PROMPT = `You are an expert technical recruiter and ATS resume writer for STUDENTS and fresh graduates.
+Write a one-page, ATS-friendly resume tailored to the target role.
+
+HARD RULES:
+- Use ONLY facts in the provided JSON. NEVER invent employers, projects, metrics, tools, certifications or dates.
+- Rewrite weak descriptions into concise bullets starting with strong action verbs (Built, Designed, Implemented, Optimized, Automated...).
+- Format: action + what/how (tools) + outcome, but only state outcomes the student actually gave.
+- Mirror terminology from target role and job description where student genuinely has that skill.
+- Plain text only: no markdown, no emojis, no first-person pronouns.
+- Group skills into categories (Languages, Frameworks, Databases, Tools, Core CS).
+- Ensure section headers and structure strictly match standard ATS expectations.
+
+Return ONLY valid JSON in exactly this shape:
+{
+ "summary": "",
+ "skills": [{"category": "", "items": [""]}],
+ "education": [{"institution": "", "degree": "", "period": "", "score": ""}],
+ "experience": [{"title": "", "organization": "", "period": "", "bullets": [""]}],
+ "projects": [{"name": "", "tech": "", "link": "", "bullets": [""]}],
+ "codingProfile": [""],
+ "certifications": [""],
+ "achievements": [""],
+ "atsKeywords": [""],
+ "tips": [""]
+}`;
+
+async function callGemini(userPrompt) {
+  if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not configured on the server.');
+
+  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+  const { data } = await axios.post(
+    url,
+    {
+      systemInstruction: { parts: [{ text: RESUME_SYSTEM_PROMPT }] },
+      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+      generationConfig: { 
+        temperature: 0.4, 
+        maxOutputTokens: 8192, 
+        responseMimeType: 'application/json' 
       }
+    },
+    { 
+      headers: { 
+        'x-goog-api-key': GEMINI_API_KEY, 
+        'Content-Type': 'application/json' 
+      }, 
+      timeout: 60000 
+    }
+  );
+
+  const text = (data?.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('');
+  if (!text) throw new Error('Gemini returned an empty response.');
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+function normalizeResume(raw, header, allowedLinks = null) {
+  const r = raw || {};
+  return {
+    header,
+    summary: str(r.summary),
+    skills: arr(r.skills).map((s) => ({ category: str(s.category), items: strList(s.items) })).filter((s) => s.items.length),
+    education: arr(r.education).map((e) => ({ institution: str(e.institution), degree: str(e.degree), period: str(e.period), score: str(e.score) })).filter((e) => e.institution || e.degree),
+    experience: arr(r.experience).map((e) => ({ title: str(e.title), organization: str(e.organization), period: str(e.period), bullets: strList(e.bullets) })).filter((e) => e.title || e.organization),
+    projects: arr(r.projects).map((p) => {
+      const link = str(p.link);
+      const ok = allowedLinks ? allowedLinks.includes(link) : /^https?:\/\//i.test(link);
+      return { name: str(p.name), tech: str(p.tech), link: ok ? link : '', bullets: strList(p.bullets) };
+    }).filter((p) => p.name),
+    codingProfile: strList(r.codingProfile),
+    certifications: strList(r.certifications),
+    achievements: strList(r.achievements),
+    atsKeywords: strList(r.atsKeywords),
+    tips: strList(r.tips)
+  };
+}
+
+const repoKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+function ghHeaders() {
+  const h = { ...UA, Accept: 'application/vnd.github+json' };
+  if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  return h;
+}
+
+async function fetchOwnRepos(owner) {
+  const { data } = await axios.get(`https://api.github.com/users/${owner}/repos?per_page=100&sort=updated`, { headers: ghHeaders(), timeout: 15000 });
+  return Array.isArray(data) ? data : [];
+}
+
+function rankRepos(repos, owner) {
+  return repos.filter((r) => !r.fork && r.size > 0 && r.name.toLowerCase() !== owner.toLowerCase()).sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0) || (b.size || 0) - (a.size || 0));
+}
+
+function cleanReadme(md = '') {
+  return String(md).replace(/```[\s\S]*?```/g, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2500);
+}
+
+async function getFlagshipRepo(githubRaw) {
+  const owner = parseProfileInput('github', githubRaw)?.username;
+  if (!owner) return null;
+  const top = rankRepos(await fetchOwnRepos(owner), owner)[0];
+  if (!top) return null;
+
+  const [langRes, readmeRes] = await Promise.all([
+    axios.get(`https://api.github.com/repos/${owner}/${top.name}/languages`, { headers: ghHeaders(), timeout: 15000 }).catch(() => ({ data: {} })),
+    axios.get(`https://api.github.com/repos/${owner}/${top.name}/readme`, { headers: { ...ghHeaders(), Accept: 'application/vnd.github.raw+json' }, timeout: 15000, transformResponse: [(d) => d] }).catch(() => ({ data: '' }))
+  ]);
+
+  const entries = Object.entries(langRes.data || {});
+  const totalBytes = entries.reduce((s, [, b]) => s + b, 0) || 1;
+  const languages = entries.sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name, bytes]) => ({ name, percent: Math.round((bytes / totalBytes) * 100) }));
+
+  return {
+    name: top.name,
+    displayName: top.name.replace(/[-_]+/g, ' '),
+    url: top.html_url,
+    description: top.description || '',
+    topics: top.topics || [],
+    stars: top.stargazers_count || 0,
+    forks: top.forks_count || 0,
+    sizeKB: top.size || 0,
+    languages,
+    tech: [...languages.map((l) => l.name), ...(top.topics || []).slice(0, 3)].join(', '),
+    readmeExcerpt: cleanReadme(readmeRes.data)
+  };
+}
+
+async function fetchTopRepos(githubRaw, limit = 4) {
+  const owner = parseProfileInput('github', githubRaw)?.username;
+  if (!owner) return [];
+  return rankRepos(await fetchOwnRepos(owner), owner).slice(0, limit).map((r, i) => ({
+    name: r.name.replace(/[-_]+/g, ' '),
+    tech: [r.language, ...(r.topics || []).slice(0, 4)].filter(Boolean).join(', '),
+    description: r.description || '',
+    repo: r.name,
+    repoUrl: r.html_url,
+    flagship: i === 0,
+    stars: r.stargazers_count || 0
+  }));
+}
+
+function mergeFlagship(projects, flagship, ghUser) {
+  const prefix = ghUser ? `https://github.com/${ghUser}/`.toLowerCase() : null;
+  const clean = projects.map((p) => ({
+    name: str(p.name),
+    tech: str(p.tech),
+    description: str(p.description),
+    repoUrl: prefix && str(p.repoUrl).toLowerCase().startsWith(prefix) ? str(p.repoUrl) : undefined
+  }));
+  if (!flagship) return clean;
+
+  const github = { stars: flagship.stars, forks: flagship.forks, sizeKB: flagship.sizeKB, languages: flagship.languages, topics: flagship.topics, readmeExcerpt: flagship.readmeExcerpt };
+  const i = clean.findIndex((p) => p.repoUrl === flagship.url || repoKey(p.name) === repoKey(flagship.name));
+  if (i >= 0) {
+    const [p] = clean.splice(i, 1);
+    clean.unshift({ ...p, name: p.name || flagship.displayName, tech: p.tech || flagship.tech, description: p.description || flagship.description, repoUrl: flagship.url, github });
+  } else {
+    clean.unshift({ name: flagship.displayName, tech: flagship.tech, description: flagship.description, repoUrl: flagship.url, github });
+  }
+  return clean.slice(0, 6);
+}
+
+app.post('/api/resume/generate', async (req, res) => {
+  const { username, targetRole, jobDescription, details = {} } = req.body || {};
+  const role = str(targetRole).slice(0, 100);
+  if (!role) return res.status(400).json({ error: 'Target position is required.' });
+
+  const db = loadDB();
+  const user = db.users.find((u) => u.username.toLowerCase() === (username || '').toLowerCase() && u.role === 'candidate');
+  if (!user) return res.status(404).json({ error: 'Candidate not found.' });
+
+  const header = buildHeader(user, details);
+  const ghUser = user.links?.github ? parseProfileInput('github', user.links.github)?.username : null;
+  let flagship = null;
+  if (ghUser && details.includeTopRepo !== false) {
+    try { flagship = await getFlagshipRepo(user.links.github); }
+    catch (err) { console.warn('Flagship repo lookup failed:', err.message); }
+  }
+  const projects = mergeFlagship(arr(details.projects).slice(0, 6), flagship, ghUser);
+  const allowedLinks = projects.map((p) => p.repoUrl).filter(Boolean);
+
+  const facts = {
+    targetRole: role,
+    jobDescription: str(jobDescription).slice(0, 6000) || null,
+    student: {
+      college: str(details.college),
+      degree: str(details.degree),
+      graduationYear: str(details.gradYear),
+      academics: {
+        cgpa: user.academics?.cgpa || null,
+        tenthPercentage: user.academics?.tenthPercentage || null,
+        twelfthPercentage: user.academics?.twelfthPercentage || null
+      },
+      skills: str(details.skills),
+      projects,
+      experience: arr(details.experience).slice(0, 6),
+      certifications: str(details.certifications),
+      achievements: str(details.achievements)
+    },
+    codingStats: buildCodingFacts(user)
+  };
+
+  try {
+    const raw = await callGemini(`Student facts (JSON):\n${JSON.stringify(facts, null, 2)}`);
+    res.json({ resume: normalizeResume(raw, header, allowedLinks) });
+  } catch (err) {
+    const reason = err.response?.data?.error?.message || err.message;
+    console.error('Resume generation failed:', reason);
+    res.status(502).json({ error: `Resume generation failed: ${reason}` });
+  }
+});
+
+function resumeToDocx(r) {
+  const FONT = 'Calibri';
+  const run = (text, o = {}) => new TextRun({ text, font: FONT, size: 21, ...o });
+  const center = (text, o = {}) => new Paragraph({ alignment: AlignmentType.CENTER, children: [run(text, o)] });
+  const section = (title) => new Paragraph({
+    spacing: { before: 200, after: 80 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '000000', space: 1 } },
+    children: [run(title.toUpperCase(), { bold: true, size: 22 })]
+  });
+  const bullet = (t) => new Paragraph({ bullet: { level: 0 }, spacing: { after: 40 }, children: [run(t)] });
+  const row = (left, right) => new Paragraph({
+    tabStops: [{ type: TabStopType.RIGHT, position: 9906 }],
+    spacing: { before: 80 },
+    children: [run(left, { bold: true }), ...(right ? [run(`\t${right}`)] : [])]
+  });
+
+  const h = r.header;
+  const k = [center(h.name, { bold: true, size: 34 })];
+  const contact = [h.email, h.phone, h.location].filter(Boolean).join(' | ');
+  if (contact) k.push(center(contact));
+  if (h.links.length) k.push(center(h.links.map((l) => `${l.label}: ${l.url}`).join(' | ')));
+
+  if (r.summary) k.push(section('Professional Summary'), new Paragraph({ children: [run(r.summary)] }));
+
+  if (r.education.length) {
+    k.push(section('Education'));
+    r.education.forEach((e) => {
+      k.push(row(e.institution, e.period));
+      const line = [e.degree, e.score].filter(Boolean).join(' | ');
+      if (line) k.push(new Paragraph({ children: [run(line)] }));
     });
   }
+  if (r.skills.length) {
+    k.push(section('Technical Skills'));
+    r.skills.forEach((s) => k.push(new Paragraph({ spacing: { after: 40 }, children: [run(`${s.category}: `, { bold: true }), run(s.items.join(', '))] })));
+  }
+  if (r.projects.length) {
+    k.push(section('Projects'));
+    r.projects.forEach((p) => {
+      k.push(row(p.tech ? `${p.name} | ${p.tech}` : p.name));
+      if (p.link) k.push(new Paragraph({ children: [run(p.link, { size: 19 })] }));
+      p.bullets.forEach((b) => k.push(bullet(b)));
+    });
+  }
+  if (r.experience.length) {
+    k.push(section('Experience'));
+    r.experience.forEach((e) => {
+      k.push(row([e.title, e.organization].filter(Boolean).join(' | '), e.period));
+      e.bullets.forEach((b) => k.push(bullet(b)));
+    });
+  }
+  if (r.codingProfile.length) { k.push(section('Coding Profile')); r.codingProfile.forEach((b) => k.push(bullet(b))); }
+  if (r.certifications.length) { k.push(section('Certifications')); r.certifications.forEach((b) => k.push(bullet(b))); }
+  if (r.achievements.length) { k.push(section('Achievements')); r.achievements.forEach((b) => k.push(bullet(b))); }
 
-  db.users.splice(userIdx, 1);
-  saveDB(db);
-  res.json({ message: 'Account permanently deleted.' });
+  return new Document({
+    sections: [{
+      properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 850, bottom: 850, left: 1000, right: 1000 } } },
+      children: k
+    }]
+  });
+}
+
+app.post('/api/resume/docx', async (req, res) => {
+  try {
+    const resume = req.body?.resume;
+    if (!resume?.header?.name) return res.status(400).json({ error: 'Resume data missing.' });
+    const buffer = await Packer.toBuffer(resumeToDocx(normalizeResume(resume, resume.header)));
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', 'attachment; filename="resume.docx"');
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: 'Could not build the DOCX file.' });
+  }
+});
+
+function normLang(name) {
+  const n = String(name || '');
+  if (/kotlin/i.test(n)) return 'Kotlin';
+  if (/c\+\+/i.test(n)) return 'C++';
+  if (/c#/i.test(n)) return 'C#';
+  if (/python|pypy/i.test(n)) return 'Python';
+  if (/typescript/i.test(n)) return 'TypeScript';
+  if (/javascript|node\.?js/i.test(n)) return 'JavaScript';
+  if (/\bjava\b/i.test(n)) return 'Java';
+  if (/rust/i.test(n)) return 'Rust';
+  if (/^go\b|golang/i.test(n)) return 'Go';
+  if (/^(gnu )?c(\d+)?\b/i.test(n)) return 'C';
+  return n.trim();
+}
+
+app.get('/api/resume/prefill/:username', async (req, res) => {
+  const db = loadDB();
+  const user = db.users.find((u) => u.username.toLowerCase() === req.params.username.toLowerCase() && u.role === 'candidate');
+  if (!user) return res.status(404).json({ error: 'Candidate not found.' });
+
+  const s = user.latestScore;
+  const exp = user.institutionalExperience || {};
+  const n = (v) => Number(v) || 0;
+  const plural = (c, word) => `${c} ${word}${c === 1 ? '' : 's'}`;
+  const notes = [];
+
+  const langs = [...new Set((s?.languageAnalysis || []).map((l) => normLang(l.language)).filter(Boolean))].slice(0, 7);
+  const topics = (s?.swot?.strengths || []).map((t) => t.topic);
+  const skills = [...new Set([
+    ...langs,
+    ...(s?.difficultyProfile?.total > 0 ? ['Data Structures & Algorithms'] : []),
+    ...topics
+  ])].join(', ');
+
+  let projects = [];
+  if (user.links?.github) {
+    try { projects = await fetchTopRepos(user.links.github); }
+    catch (err) { notes.push('Could not read your GitHub repositories right now, so add projects manually.'); }
+  } else {
+    notes.push('No GitHub profile is linked, so add projects manually.');
+  }
+
+  const experience = [];
+  if (exp.internationalInternship) experience.push({ role: 'International Internship / Credit Transfer', org: '', period: '', description: '' });
+  for (let i = 0; i < n(exp.reputedInternshipsCount); i++) experience.push({ role: 'Intern', org: '', period: '', description: '' });
+  for (let i = 0; i < n(exp.eduskillsInternshipsCount); i++) experience.push({ role: 'Intern', org: 'EduSkills', period: '', description: '' });
+
+  const ach = [];
+  if (n(exp.hackathonsFirstCount)) ach.push(`Won 1st prize in ${plural(n(exp.hackathonsFirstCount), 'hackathon/competition')}`);
+  if (n(exp.hackathonsSecondCount)) ach.push(`Won 2nd prize in ${plural(n(exp.hackathonsSecondCount), 'hackathon/competition')}`);
+  if (n(exp.hackathonsThirdCount)) ach.push(`Received 3rd place/consolation prize in ${plural(n(exp.hackathonsThirdCount), 'hackathon/competition')}`);
+  if (n(exp.hackathonsParticipationCount)) ach.push(`Participated in ${plural(n(exp.hackathonsParticipationCount), 'hackathon/coding competition')}`);
+
+  res.json({ skills, projects, experience, achievements: ach.join('\n'), note: notes.join(' ') });
 });
 
 const server = app.listen(PORT, () => {
